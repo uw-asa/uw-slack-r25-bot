@@ -1,0 +1,8 @@
+{
+    "text": {
+        "HELP": "You can type \"/r25 ...\" into slack with a building and room number to get today's events and classes listed into the channel!\nDon't want to post the schedule into the channel, but just want the info? Use the /r25 command in a private chat to slackbot. or yourself, or whoever!\nExample usage: \"/r25 KNE 130\"\nYou may also ask for all breaks, rather than the events/classes, the next break coming up, or for events on another day using \"tomorrow\" or \"+1\".\nFor example: \"/r25 KNE 130 breaks\"\nor: \"/r25 KNE 130 next break\"\nor: \"/r25 KNE 130 tomorrow\"\nTry out commands and see what you can do!",
+        "ERROR-GENERIC": "Error: incorrect or malformed search string.\nDid you search for something like \"KNE 130\"?\nYou may also type '/r25 help' for more info.",
+        "ERROR-ROOM-QUERY": "Error: unable to resolve room query. Please make sure the Building Code and Room Number are correct. Type '/r25 help' for additional info.",
+        "ERROR-EXTENDED-COMMAND": "Error: unable to parse extended command arguments. Please check that your command adheres to the supported format(s). Type '/r25 help' for additional info."
+    }
+}
