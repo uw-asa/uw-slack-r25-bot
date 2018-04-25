@@ -2,7 +2,7 @@
 
 const axios = require('axios')
 
-function postSchedule(scheduleData, responseUrl) {
+function postData(scheduleData, responseUrl) {
   axios.post(
     responseUrl,
     scheduleData,
@@ -14,4 +14,6 @@ function postSchedule(scheduleData, responseUrl) {
   )
 }
 
-module.exports = postSchedule
+module.exports = {
+  postData
+}
