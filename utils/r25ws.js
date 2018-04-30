@@ -32,12 +32,12 @@ function getTimesForId(command, callback) {
         var schedule = []
         reservationsRoot.forEach(function (el) {
           // console.log(el.reservation_start_dt[0])
-          var course = {
+          var event = {
             name: el.event_name[0],
             startTime: datetimeUtils.getTimeFromDateTime(el.reservation_start_dt[0]),
             endTime: datetimeUtils.getTimeFromDateTime(el.reservation_end_dt[0])
           }
-          schedule.push(course)
+          schedule.push(event)
         })
         // console.log(schedule)
         callback(schedule)
