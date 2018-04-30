@@ -28,9 +28,9 @@ function getDateStrFromDayDelta(deltaStr) {
   if (deltaStr[0] == '+' && deltaStr.length > 1 && !isNaN(parseInt(deltaStr.slice(1)))) {
     var timeDiffMs = parseInt(deltaStr.slice(1)) * MS_IN_DAY
     var todayEpoch = new Date().getTime()
-    return new Date(todayEpoch + timeDiffMs).toLocaleDateString()
+    return new Date(todayEpoch + timeDiffMs).toLocaleDateString('en-US')
   } else {
-    return new Date().toLocaleDateString()
+    return new Date().toLocaleDateString('en-US')
   }
 }
 

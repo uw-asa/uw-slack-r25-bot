@@ -13,13 +13,13 @@ describe('datetimeUtils.js getDateStrFromDayDelta()', function () {
   it('Expect locale date string to be offset by 1 for \'+1\'', function () {
     var result = datetimeUtils.getDateStrFromDayDelta('+1')
     var todayEpoch = new Date().getTime()
-    var expectedResult = new Date(todayEpoch + 86400000).toLocaleDateString()
+    var expectedResult = new Date(todayEpoch + 86400000).toLocaleDateString('en-US')
     expect(result).to.equal(expectedResult)
   })
 
   it('Expect no offset if offset parameter is malformed', function () {
     var result = datetimeUtils.getDateStrFromDayDelta('5')
-    var expectedResult = new Date().toLocaleDateString()
+    var expectedResult = new Date().toLocaleDateString('en-US')
     expect(result).to.equal(expectedResult)
   })
 })
