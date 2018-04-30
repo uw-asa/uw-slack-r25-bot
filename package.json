@@ -1,10 +1,11 @@
 {
   "name": "uw-slackr25",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "AWS/Lambda Function to give Slack R25 room reservation time data",
   "main": "handler.js",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "utilities": "utils"
   },
   "scripts": {
     "test": "mocha"
