@@ -7,7 +7,7 @@ const querystring = require('querystring')
 const r25ws = require('./utils/r25ws')
 const processSchedule = require('./utils/r25wsResponseHandler').processSchedule
 const processBreaks = require('./utils/r25wsResponseHandler').processBreaks
-const parser = require('./utils/commandParser')
+const parser = require('./utils/parseCommand')
 const postData = require('./utils/postData')
 
 module.exports.getTimes = (event, context, callback) => {
