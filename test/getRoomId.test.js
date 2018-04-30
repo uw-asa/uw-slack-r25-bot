@@ -3,7 +3,7 @@ const getRoomId = require('../utils/getRoomId')
 
 describe('getRoomId(roomQuery)', function () {
   it('should load the json list of rooms and return the id or null', function () {
-    var queryAND = "AND 008"
+    var queryAND = 'AND 008'
 
     var ANDid = getRoomId(queryAND)
 
@@ -12,7 +12,7 @@ describe('getRoomId(roomQuery)', function () {
   })
 
   it('should find the id for WFS 201', function () {
-    var queryWFS = "WFS 201"
+    var queryWFS = 'WFS 201'
 
     var WFSid = getRoomId(queryWFS)
 
@@ -21,7 +21,7 @@ describe('getRoomId(roomQuery)', function () {
   })
 
   it('should return null for a room not in the json list.', function () {
-    var queryNotList = "KNE 035"
+    var queryNotList = 'KNE 035'
 
     var notInListId = getRoomId(queryNotList)
 
