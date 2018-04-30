@@ -84,7 +84,8 @@ function processBreaks(results, command) {
     responseData['attachments'] = breaks
   } else { // not all breaks // allBreaks == false
     responseData['text'] = 'Next Break for ' + command.querySpace
-    responseData['attachments'] = breaks[nextBreakIndex]
+    let singleBreak = [breaks[nextBreakIndex]] // make an array copy, only keeping the desired break item.
+    responseData['attachments'] = singleBreak
   }
 
   return responseData
