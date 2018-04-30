@@ -7,15 +7,18 @@
 */
 const getRoomId = require('./getRoomId')
 const responseText = require('./responseText.json') // long blobs of static text to be returned to the user
+const getDateStrFromDayDelta = require('./datetimeUtils').getDateStrFromDayDelta
 
 function parseCommand(queryText) {
   queryText = queryText.trim().toUpperCase()
+  //TODO: refactor 'command' into an object for easier use elsewhere
   var command = {
     elements: null,
     numberOfElements: null,
     resolvedCommand: null,
     resolvedCommandText: null,
     querySpace: null,
+    queryDateStr: null,
     roomId: null,
     args: {
       dayDeltaStr: null,
@@ -34,6 +37,7 @@ function parseCommand(queryText) {
     command.querySpace = command.elements[0] + ' ' + command.elements[1]
     command.roomId = getRoomId(command.querySpace)
     command.resolvedCommand = 'SCHEDULE'
+    command.queryDateStr = new Date().toLocaleDateString('en-US')
 
     if (command.roomId == null) {
       command.resolvedCommand = 'ERROR'
@@ -45,12 +49,15 @@ function parseCommand(queryText) {
         ...['next break'] == show the next break only
         ...['tomorrow'] == special - give tomorrow's times
         ...['+1' | '+2' | etc.] == day delta
-        ...['02/13/2018'] -- parse and find actual date
+        TODO: ...['02/13/2018'] -- parse and find actual date
       */
       if (command.elements[2] == 'TOMORROW') {
         command.args.dayDeltaStr = '+1'
+        command.queryDateStr = getDateStrFromDayDelta(command.args.dayDeltaStr)
+        
       } else if (command.elements[2][0] == '+' && !isNaN(parseInt(command.elements[2].slice(1)))) {
         command.args.dayDeltaStr = command.elements[2]
+        command.queryDateStr = getDateStrFromDayDelta(command.args.dayDeltaStr)
 
       } else if (command.elements[2] == 'BREAKS' || command.elements[2] == 'NEXT') {
         command.resolvedCommand = 'BREAKS'
@@ -71,6 +78,8 @@ function parseCommand(queryText) {
 
   return command
 }
+
+
 
 module.exports = {
   parseCommand
