@@ -8,7 +8,7 @@ const r25ws = require('./utils/r25ws')
 const processSchedule = require('./utils/r25wsResponseHandler').processSchedule
 const processBreaks = require('./utils/r25wsResponseHandler').processBreaks
 const parser = require('./utils/parseCommand')
-const postData = require('./utils/postData')
+const postData = require('./utils/postData').postData
 
 module.exports.getTimes = (event, context, callback) => {
   // console.log(event); // Contains incoming request data (e.g., query params, headers and more)
