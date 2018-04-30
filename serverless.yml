@@ -65,7 +65,7 @@ functions:
     handler: handler.getTimes    
     package:
       include:
-        - utils/spaces.json
+        - utils/**
       exclude:
         - test/**
 
