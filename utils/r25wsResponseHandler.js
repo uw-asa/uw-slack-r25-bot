@@ -22,7 +22,7 @@ function processSchedule(results, command) {
   // console.log(schedule)
   return { //data
     'response_type': 'in_channel',
-    'text': command.querySpace + ' has ' + eventCount + ' events today.',
+    'text': 'Events for ' + command.querySpace + ' on ' + command.queryDateStr + ' (' + eventCount + ' events):',
     'attachments': schedule
   }
 }

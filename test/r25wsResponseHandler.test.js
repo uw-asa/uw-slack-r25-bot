@@ -20,11 +20,13 @@ describe('processSchedule(results, command)', function () {
   it('expect output text to reflect input values', function () {
     var schedule = processSchedule(testData.validExample.results, testData.validExample.command)
     expect(schedule.text).to.equal(
-      testData.validExample.command.querySpace + ' has ' + testData.validExample.results.length + ' events today.')
+      'Events for ' + testData.validExample.command.querySpace + ' on ' + testData.validExample.command.queryDateStr +
+      ' (' +testData.validExample.results.length + ' events):')
 
     schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
     expect(schedule.text).to.equal(
-      testData.emptyValues.command.querySpace + ' has ' + testData.emptyValues.results.length + ' events today.')
+      'Events for ' + testData.emptyValues.command.querySpace + ' on ' + testData.emptyValues.command.queryDateStr +
+      ' (' +testData.emptyValues.results.length + ' events):')
   })
 
   it('expect response type to always be \'in_channel\'', function () {
@@ -121,7 +123,8 @@ const testData = {
   emptyValues: {
     results: [],
     command: {
-      querySpace: ''
+      querySpace: '',
+      queryDateStr: null
     }
   },
   validExample: {
@@ -148,7 +151,8 @@ const testData = {
       }
     ],
     command: {
-      querySpace: 'ARC 147'
+      querySpace: 'ARC 147',
+      queryDateStr: '04/17/2018'
     }
   },
   validCrossListExample: {
