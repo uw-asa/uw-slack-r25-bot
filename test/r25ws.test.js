@@ -14,8 +14,12 @@ describe('r25ws.getTimesForId(id)', function () {
 
   it('should return and process xml for ARC 147 given id "6063"', function (done) {
     this.timeout(10000) // access r25 data store, takes time
-    var roomId = "6063" // == ARC 147
-    r25ws.getTimesForId(roomId, function(result) {
+    // requires a command object with dayDeltaStr and roomId
+    var command = {
+      dayDeltaStr: '+0',
+      roomId: '6063'  // == ARC 147
+    }
+    r25ws.getTimesForId(command, function(result) {
       done()
       // console.log(result)
       expect(result).to.be.instanceOf(Array)
