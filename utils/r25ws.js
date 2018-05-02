@@ -19,12 +19,13 @@ function getTimesForId(command, callback) {
     responseType: 'document',
     timeout: 10000
   }
-  if (command.dayDeltaStr != null) {
-    queryData.params.start_dt = command.dayDeltaStr
-    queryData.params.end_dt = command.dayDeltaStr
+  if (command.args.dayDeltaStr != null) {
+    queryData.params.start_dt = command.args.dayDeltaStr
+    queryData.params.end_dt = command.args.dayDeltaStr
   }
   axios.get(resourceUrl, queryData)
     .then(function(response) {
+      // console.log(response)
       //parse response xml
       parseString(response.data, { tagNameProcessors: [stripNS], mergeAttrs: true }, function (err, result) {
         // console.log(result)
