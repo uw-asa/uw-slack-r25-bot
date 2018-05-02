@@ -17,6 +17,11 @@ service: uw-slackr25bot # NOTE: update this with your service name
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
+customVars:
+  snsTopic: "dispatchR25-${self:customVars.stage}"
+  region: us-west-2
+  stage: dev
+
 provider:
   name: aws
   runtime: nodejs8.10
@@ -24,10 +29,15 @@ provider:
   timeout: 30 # optional; in seconds; default = 6
   reservedConcurrency: 10 # optional, reserved concurrency limit for this function. By default, AWS uses account concurrency limit
   versionFunctions: false # optional, default is true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - SNS:Publish
+      Resource: { "Fn::Join" : [":", ["arn:aws:sns:${self:customVars.region}", { "Ref" : "AWS::AccountId" }, "${self:customVars.snsTopic}" ] ]  }
 
 # you can overwrite defaults here
-  stage: prod
-  region: us-west-2
+  stage: ${self:customVars.stage}
+  region: ${self:customVars.region}
   r25envfile: ${file(./env-vars/r25ws.json)}
   slackenvfile: ${file(./env-vars/slack.json)}
 
@@ -62,7 +72,17 @@ provider:
 
 functions:
   uw-slackr25:
-    handler: handler.getTimes    
+    handler: handler.getTimes
+    package:
+      include:
+        - ./utils/**
+      exclude:
+        - ./test/**
+    events:
+      - sns: ${self:customVars.snsTopic}
+
+  uw-slackr25-parse:
+    handler: handler.parse
     package:
       include:
         - utils/**
@@ -104,7 +124,8 @@ functions:
       R25WSUSER: ${self:provider.r25envfile.user}
       R25WSPASS: ${self:provider.r25envfile.password}
       R25WSROOTURL: ${self:provider.r25envfile.baseUrl}
-      SLACK_TOKEN: ${self:provider.slackenvfile.${self:provider.stage}.slack-token}
+      SLACK_TOKEN: ${self:provider.slackenvfile.${self:customVars.stage}.slack-token}
+      SNS_TOPIC_ARN: { "Fn::Join" : [":", ["arn:aws:sns:${self:customVars.region}", { "Ref" : "AWS::AccountId" }, "${self:customVars.snsTopic}" ] ]  }
 
 
 # you can add CloudFormation resource templates here
