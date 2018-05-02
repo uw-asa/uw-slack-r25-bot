@@ -23,6 +23,8 @@ function getTimesForId(command, callback) {
     queryData.params.start_dt = command.args.dayDeltaStr
     queryData.params.end_dt = command.args.dayDeltaStr
   }
+  // console.log('gettimesforid url: ' + resourceUrl)
+  // console.log('gettimesforid data: ' + queryData)
   axios.get(resourceUrl, queryData)
     .then(function(response) {
       // console.log(response)
@@ -45,6 +47,7 @@ function getTimesForId(command, callback) {
       })
     })
     .catch(function (error) {
+      console.log('r25ws AXIOS GET ERROR')
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx

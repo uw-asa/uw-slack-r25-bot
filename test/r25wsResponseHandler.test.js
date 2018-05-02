@@ -116,6 +116,8 @@ describe('processBreaks(results, command)', function () {
     expect(breaks.attachments[0].title).to.equal('Break between Current Event and Next Event')
     expect(breaks.attachments[0].text).to.equal(e2_fortyMinFuture + ' to ' + s3_fiftyMinFuture + ' *(10 mins)*')
   })
+
+  // TODO: better tests for NEXT BREAK command.
 })
 
 

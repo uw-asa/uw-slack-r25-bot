@@ -17,10 +17,11 @@ service: uw-slackr25bot # NOTE: update this with your service name
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
-customVars:
-  snsTopic: "dispatchR25-${self:customVars.stage}"
+custom:
+  snsTopic: dispatchR25-${self:custom.stage}
   region: us-west-2
   stage: dev
+  timezone: 'America/Los_Angeles'
 
 provider:
   name: aws
@@ -33,11 +34,11 @@ provider:
     - Effect: Allow
       Action:
         - SNS:Publish
-      Resource: { "Fn::Join" : [":", ["arn:aws:sns:${self:customVars.region}", { "Ref" : "AWS::AccountId" }, "${self:customVars.snsTopic}" ] ]  }
+      Resource: { "Fn::Join" : [":", ["arn:aws:sns:${self:custom.region}", { "Ref" : "AWS::AccountId" }, "${self:custom.snsTopic}" ] ]  }
 
 # you can overwrite defaults here
-  stage: ${self:customVars.stage}
-  region: ${self:customVars.region}
+  stage: ${self:custom.stage}
+  region: ${self:custom.region}
   r25envfile: ${file(./env-vars/r25ws.json)}
   slackenvfile: ${file(./env-vars/slack.json)}
 
@@ -79,7 +80,12 @@ functions:
       exclude:
         - ./test/**
     events:
-      - sns: ${self:customVars.snsTopic}
+      - sns: ${self:custom.snsTopic}
+    environment:
+      TZ: ${self:custom.timezone}
+      R25WSUSER: ${self:provider.r25envfile.user}
+      R25WSPASS: ${self:provider.r25envfile.password}
+      R25WSROOTURL: ${self:provider.r25envfile.baseUrl}
 
   uw-slackr25-parse:
     handler: handler.parse
@@ -121,11 +127,9 @@ functions:
 
 #    Define function environment variables here
     environment:
-      R25WSUSER: ${self:provider.r25envfile.user}
-      R25WSPASS: ${self:provider.r25envfile.password}
-      R25WSROOTURL: ${self:provider.r25envfile.baseUrl}
-      SLACK_TOKEN: ${self:provider.slackenvfile.${self:customVars.stage}.slack-token}
-      SNS_TOPIC_ARN: { "Fn::Join" : [":", ["arn:aws:sns:${self:customVars.region}", { "Ref" : "AWS::AccountId" }, "${self:customVars.snsTopic}" ] ]  }
+      TZ: ${self:custom.timezone}
+      SLACK_TOKEN: ${self:provider.slackenvfile.${self:custom.stage}.slack-token}
+      SNS_TOPIC_ARN: { "Fn::Join" : [":", ["arn:aws:sns:${self:custom.region}", { "Ref" : "AWS::AccountId" }, "${self:custom.snsTopic}" ] ]  }
 
 
 # you can add CloudFormation resource templates here

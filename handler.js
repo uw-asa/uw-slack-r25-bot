@@ -63,13 +63,10 @@ function parse(event, context, callback) {
       var snsClient = new SNS()
       var snsParams = {
         TopicArn: process.env.SNS_TOPIC_ARN,
-        Message: {
-          'default': {
-            'response_url': payload.response_url,
-            'command': command
-          }
-        },
-        MessageStructure: 'json'
+        Message: JSON.stringify({
+          'response_url': payload.response_url,
+          'command': command
+        })
       }
       snsClient.publish(snsParams, function(err, data) {
         if (err) {
@@ -85,13 +82,15 @@ function parse(event, context, callback) {
 
 function getTimes(event, context, callback) {
   //get the command and response url from the incoming message from SNS
-  var command = event.Records[0].Sns.Message.command
-  const response_url = event.Records[0].Sns.Message.response_url
-  console.log('RECEIVED DATA: (DEBUG)')
-  console.log(event)
-  console.log(command)
-  console.log(response_url)
-  console.log('END RECEIVED DATA DEBUG')
+  var messageJson = JSON.parse(event.Records[0].Sns.Message)
+  var command = messageJson.command
+  const response_url = messageJson.response_url
+  // console.log('RECEIVED DATA: (DEBUG)')
+  // console.log('MESSAGE:' + event.Records[0].Sns.Message)
+  // console.log('COMMAND:' + JSON.stringify(command))
+  // console.log('SPACEid:' + command.roomId)
+  // console.log('URL:' + response_url)
+  // console.log('END RECEIVED DATA DEBUG')
   callback(null, { statusCode: 200 })
   r25ws.getTimesForId(command, function (results) {
     var data = null

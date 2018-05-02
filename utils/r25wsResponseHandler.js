@@ -45,6 +45,7 @@ function processBreaks(results, command) {
 
     // collect current time for next break determination
     var nowTimeStr = new Date().toLocaleTimeString()
+    // console.log('nowtime: ' + nowTimeStr)
 
     // go through event start and end times to calculate inter-event breaks.
     // this loop could uses two variables to iterate through the lists for clarity.
@@ -69,7 +70,7 @@ function processBreaks(results, command) {
     }
   } else {
     // no events = no breaks
-    nextBreakIndex = 0 // set in case command asked for next break but there are no breaks or events
+    nextBreakIndex = 0 // set in case command asked for next break but there are no events
     breaks.push({
       'title': 'Wide open!'
     })
@@ -83,9 +84,14 @@ function processBreaks(results, command) {
     responseData['text'] = 'Breaks for ' + command.querySpace
     responseData['attachments'] = breaks
   } else { // not all breaks // allBreaks == false
-    responseData['text'] = 'Next Break for ' + command.querySpace
-    let singleBreak = [breaks[nextBreakIndex]] // make an array copy, only keeping the desired break item.
-    responseData['attachments'] = singleBreak
+    if (nextBreakIndex === null) {
+      responseData['text'] = 'No further short breaks. Last booking in ' + command.querySpace + ' ends/ended at ' + endTimeStr[endTimeStr.length - 1]
+    } else {
+      responseData['text'] = 'Next Break for ' + command.querySpace
+      let singleBreak = [breaks[nextBreakIndex]] // make an array copy, only keeping the desired break item.
+      console.log('index: ' + nextBreakIndex)
+      responseData['attachments'] = singleBreak
+    }
   }
 
   return responseData
