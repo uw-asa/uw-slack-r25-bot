@@ -16,8 +16,10 @@ describe('r25ws.getTimesForId(id)', function () {
     this.timeout(10000) // access r25 data store, takes time
     // requires a command object with dayDeltaStr and roomId
     var command = {
-      dayDeltaStr: null,
-      roomId: '6063'  // == ARC 147
+      roomId: '6063',  // == ARC 147
+      args: {
+        dayDeltaStr: null
+      }
     }
     r25ws.getTimesForId(command, function(result) {
       done()
