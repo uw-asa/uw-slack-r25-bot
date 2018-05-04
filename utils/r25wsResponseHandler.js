@@ -1,8 +1,26 @@
+'use strict'
 
+/* r25wsResponseHandler.js
+ * Chase Sawyer
+ * University of Washington, 2018
+ * 
+ * Utility functions for handling the response data from the r25 web service. Processes the data into a format
+ * that can be posted to Slack without additional formatting.
+ */
+
+// local utilities
 const timeStrDiffMin = require('./datetimeUtils').timeStrDiffMin
 
+/**
+ * Takes an array of event objects and processes them into a schedule with the name of the event and 
+ * the start and end times. The output is in the format of a Slack message where each event is 
+ * in an attachment - the order of the results passed is the order in which they are posted (no sorting)
+ * @param {Array} results Event objects describing event names, start, and end times. 
+ * @param {JSON} command Parsed command info
+ * @returns {JSON} Data formatted for posting to Slack.
+ */
 function processSchedule(results, command) {
-  var schedule = []
+  var schedule = [] //list of event describing objects
   const eventCount = results.length
   // console.log(results)
   if (eventCount > 0) {
@@ -14,7 +32,7 @@ function processSchedule(results, command) {
         'mrkdwn_in': [ 'text' ]
       })
     })
-  } else {
+  } else { //no events
     schedule.push({
       'title': 'Wide open!'
     })
@@ -27,6 +45,13 @@ function processSchedule(results, command) {
   }
 }
 
+/**
+ * Takes a list of events (results) and pivots the data into 3 arrays (titles, start time, end time) which 
+ * are then traversed in order to calculate and list the breaks in between the listed events.
+ * @param {Array} results Event objects describing event names, start, and end times. 
+ * @param {JSON} command Parsed command info
+ * @returns {JSON} Data formatted for posting to Slack.
+ */
 function processBreaks(results, command) {
   var breaks = [] // list of break describing objects
   var nextBreakIndex = null
@@ -68,8 +93,7 @@ function processBreaks(results, command) {
         })
       }
     }
-  } else {
-    // no events = no breaks
+  } else { // no events = no breaks
     nextBreakIndex = 0 // set in case command asked for next break but there are no events
     breaks.push({
       'title': 'Wide open!'
@@ -80,10 +104,11 @@ function processBreaks(results, command) {
   var responseData = {
     'response_type': 'in_channel'
   }
+
   if (command.args.allBreaks) {
     responseData['text'] = 'Breaks for ' + command.querySpace
     responseData['attachments'] = breaks
-  } else { // not all breaks // allBreaks == false
+  } else { // not all breaks / allBreaks == false
     if (nextBreakIndex === null) {
       responseData['text'] = 'No further short breaks. Last booking in ' + command.querySpace + ' ends/ended at ' + endTimeStr[endTimeStr.length - 1]
     } else {

@@ -1,17 +1,37 @@
-/* helpful module for parsing out the received command, and helping the main handler
-  function decide what to do and what to return to slack/client.
-  Possible command types are some flavor of:
-    - help
-    - get schedule
-    - get breaks
-*/
+'use strict'
+
+/* parseCommand.js
+ * Chase Sawyer
+ * University of Washington, 2018
+ * Helpful module for parsing out the received command, and helping the main handler
+ * function decide what to do and what to return to slack/client.
+ * Possible command types are some flavor of:
+ *  - help
+ *  - get schedule
+ *  - get breaks
+ */
 const getRoomId = require('./getRoomId')
 const responseText = require('./responseText.json') // long blobs of static text to be returned to the user
 const getDateStrFromDayDelta = require('./datetimeUtils').getDateStrFromDayDelta
 
+/**
+ * Parses received command string, and returns a command object with the parsed parameters in a structured
+ * format.
+ * @param {String} queryText Query string received from Slack, case insensitive.
+ * @return {JSON object} command JSON with the following properties:
+ *  - elements: String array of whitespace separated query parameters
+ *  - numberOfElements: Number equal to elements.length()
+ *  - resolvedCommand: String - one of: 'HELP', 'ERROR', 'SCHEDULE', or 'BREAKS'
+ *  - resolvedCommandText: String - holds 'HELP' or 'ERROR' text to return to user
+ *  - querySpace: String - Building and room number as a string if a space can be resolved. Null otherwise.
+ *  - queryDateStr: String - Date string for the requested query date (see dayDeltaStr)
+ *  - roomId: String - r25ws space ID to query if querySpace can be resolved. Null otherwise.
+ *  - args: JSON containing:
+ *    - dayDeltaStr: String - the '+{number}' offset for the query. '+1' or greater. Null for non-offset date.
+ *    - allBreaks: Boolean - only false if command was for 'NEXT BREAK'
+ */
 function parseCommand(queryText) {
   queryText = queryText.trim().toUpperCase()
-  //TODO: refactor 'command' into an object for easier use elsewhere
   var command = {
     elements: null,
     numberOfElements: null,
@@ -26,7 +46,7 @@ function parseCommand(queryText) {
     }
   }
 
-  command.elements = queryText.split(/\s+/)
+  command.elements = queryText.split(/\s+/) // splits on one or more spaces
   command.numberOfElements = command.elements.length
 
   if (command.numberOfElements < 2 && command.elements[0] == 'HELP') {
@@ -78,8 +98,6 @@ function parseCommand(queryText) {
 
   return command
 }
-
-
 
 module.exports = {
   parseCommand

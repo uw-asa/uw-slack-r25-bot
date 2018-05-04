@@ -1,13 +1,34 @@
+'use strict'
 
-const axios = require('axios')
-const parseString = require('xml2js-parser').parseString
+/* r25ws.js
+ * Chase Sawyer
+ * University of Washington, 2018
+ * 
+ * Helper function(s) for communicating with the Resource25 web service. R25 web service documentation 
+ * can be found at http://knowledge25.collegenet.com/display/WSW/Home
+ * R25 web service returns XML data that can be then post-processed.
+ * 
+ * An XML based description of the API can be found by requesting the r25.xml document:
+ * https://webservices.collegenet.com/r25ws/wrd/sample/run/r25.xml
+ */
+
+// libs
+const axios = require('axios') // for contacting the web service
+const parseString = require('xml2js-parser').parseString 
 var stripNS = require('xml2js-parser').processors.stripPrefix
 
+// local utils
 const datetimeUtils = require('./datetimeUtils')
 
+/**
+ * Uses the rm_rsrvs.xml endpoint.
+ * Given the room ID and any offset number of days, will get the schedule in the matching room
+ * for the current date or current date + offset.
+ * @param {JSON object} command Parsed command object containing at minimum: 'roomId'
+ * @param {function} callback Command to call once request returns from R25 web service with data
+ */
 function getTimesForId(command, callback) {
-  var resourceUrl = process.env.R25WSROOTURL + 'rm_rsrvs.xml'
-  // var response = axios.get(resourceUrl, {
+  const resourceUrl = process.env.R25WSROOTURL + 'rm_rsrvs.xml'
   var queryData = {
     params: {
       space_id: command.roomId
@@ -17,24 +38,26 @@ function getTimesForId(command, callback) {
       password: process.env.R25WSPASS
     },
     responseType: 'document',
-    timeout: 10000
+    timeout: 20000 // ms. r25ws can be very slow at times and for complex queries.
   }
+
   if (command.args.dayDeltaStr != null) {
     queryData.params.start_dt = command.args.dayDeltaStr
     queryData.params.end_dt = command.args.dayDeltaStr
   }
   // console.log('gettimesforid url: ' + resourceUrl)
   // console.log('gettimesforid data: ' + queryData)
+
   axios.get(resourceUrl, queryData)
     .then(function(response) {
       // console.log(response)
-      //parse response xml
+
+      // parse response xml, trimming namespace tags out
       parseString(response.data, { tagNameProcessors: [stripNS], mergeAttrs: true }, function (err, result) {
         // console.log(result)
         var reservationsRoot = result.space_reservations.space_reservation
-        var schedule = []
+        var schedule = [] // Array of event objects to be sent back to callback function
         reservationsRoot.forEach(function (el) {
-          // console.log(el.reservation_start_dt[0])
           var event = {
             name: el.event_name[0],
             startTime: datetimeUtils.getTimeFromDateTime(el.reservation_start_dt[0]),
@@ -66,6 +89,7 @@ function getTimesForId(command, callback) {
       console.log(error.config)
       callback(error)
     })
+  // end GET
 }
 
 module.exports = {
