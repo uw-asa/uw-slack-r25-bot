@@ -105,7 +105,7 @@ describe('processBreaks(results, command)', function () {
         endTime: e3_hundredMinFuture
       }
     ]
-    // with relative results generated, we can formulate the next break command, anc check result
+    // with relative results generated, we can formulate the next break command, and check result
     var breaks = processBreaks(results, {
       querySpace: 'irrelevant, really',
       args: {
@@ -117,7 +117,36 @@ describe('processBreaks(results, command)', function () {
     expect(breaks.attachments[0].text).to.equal(e2_fortyMinFuture + ' to ' + s3_fiftyMinFuture + ' *(10 mins)*')
   })
 
-  // TODO: better tests for NEXT BREAK command.
+  it('Expect to receive message about the last break ending if there are events, but all breaks have passed.', function () {
+    // like above, all times must be manufactured to be relative to test run time.
+    let currentEpoch = new Date().getTime()
+    let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString()
+    let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString()
+    let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString()
+    let e2_fortyMinFuture = new Date(currentEpoch + 2400000).toLocaleTimeString()
+    var results = [
+      {
+        name: 'Past Event',
+        startTime: s1_seventyMinAgo,
+        endTime: e1_twentyMinAgo
+      },
+      {
+        name: 'Current Event',
+        startTime: s2_tenMinAgo,
+        endTime: e2_fortyMinFuture
+      }
+      //no next event
+    ]
+    // with relative results generated, we can formulate the next break command, and check result
+    var breaks = processBreaks(results, {
+      querySpace: 'SPACE',
+      args: {
+        allBreaks: false
+      }
+    })
+    expect(breaks.attachments).to.be.undefined
+    expect(breaks.text).to.equal('No further short breaks. Last booking in SPACE ends/ended at ' + e2_fortyMinFuture)
+  })
 })
 
 
