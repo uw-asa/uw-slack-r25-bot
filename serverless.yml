@@ -1,10 +1,6 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
+# Serverless configuration for a Slack / R25 (Resource 25) Webservice integration.
+# Code and project by Chase Sawyer
+# University of Washington, 2018
 #
 # For full config options, check the docs:
 #    docs.serverless.com
