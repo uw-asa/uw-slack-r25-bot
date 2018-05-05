@@ -2,9 +2,9 @@
 node_modules
 jspm_packages
 
-# Serverless directories
+# Serverless directories - Secrets - do not publish!
 .serverless
 
-# secrets
+# secrets - Do not publish!
 *.secret
 /env-vars
