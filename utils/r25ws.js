@@ -50,7 +50,7 @@ function getTimesForId(command, callback) {
 
   axios.get(resourceUrl, queryData)
     .then(function(response) {
-      // console.log(response)
+      console.log(response)
 
       // parse response xml, trimming namespace tags out
       parseString(response.data, { tagNameProcessors: [stripNS], mergeAttrs: true }, function (err, result) {
