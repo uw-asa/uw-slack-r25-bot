@@ -21,10 +21,10 @@ const SNS = require('aws-sdk/clients/sns')
 
 // Local Utilities
 const r25ws = require('./utils/r25ws')
-const processSchedule = require('./utils/r25wsResponseHandler').processSchedule
-const processBreaks = require('./utils/r25wsResponseHandler').processBreaks
+const responseHandler = require('./utils/r25wsResponseHandler')
 const parser = require('./utils/parseCommand')
 const postData = require('./utils/postData').postData
+const responseText = require('./utils/responseText.json')
 
 /**
  * AWS Lambda handler function implementation.
@@ -82,7 +82,7 @@ function parse(event, context, callback) {
     } else {
       // OK. Send SNS message with parsed command to start 2nd part of process with separate Lambda function,
       // and send back acknowledgement back to slack user that command is progressing.
-      const slackResponse = {
+      var slackResponse = {
         statusCode: 200,
         headers: {
           'content-type': 'application/json'
@@ -106,7 +106,11 @@ function parse(event, context, callback) {
       snsClient.publish(snsParams, function(err, data) {
         if (err) {
           console.log(err, err.stack) // an error occurred
-          // TODO: Consider posting an error message back to Slack that this failed.
+          slackResponse.body = JSON.stringify({
+            'response_type': 'ephemeral',
+            'text': 'Looks like I can\'t process your request right now. [Error logged]'
+          })
+          callback(null, slackResponse)
         } else{
           console.log('SNS Publish Success: ' + data) // successful response
           callback(null, slackResponse)
@@ -140,13 +144,19 @@ function getTimes(event, context, callback) {
   callback(null, { statusCode: 200 })
   r25ws.getTimesForId(command, function (results) {
     var data = null
-    if (command.resolvedCommand == 'SCHEDULE') {
-      data = processSchedule(results, command)
-    } else if (command.resolvedCommand == 'BREAKS') {
-      data = processBreaks(results, command)
+    if (results === null) {
+      console.log('Error//handler: Results came back null')
+      command.resolvedCommandText = responseText.text['ERROR-R25WS-DOWN']
+      data = responseHandler.processEmpty(command)
     } else {
-      // error
-      console.log('Error: resolvedCommand after getTimesForId failed to parse')
+      if (command.resolvedCommand == 'SCHEDULE') {
+        data = responseHandler.processSchedule(results, command)
+      } else if (command.resolvedCommand == 'BREAKS') {
+        data = responseHandler.processBreaks(results, command)
+      } else {
+        // error
+        console.log('Error: resolvedCommand after getTimesForId failed to parse')
+      }
     }
     postData(data, response_url)
   })

@@ -3,6 +3,7 @@ const expect = require('chai').expect
 
 const processSchedule = require('../utils/r25wsResponseHandler').processSchedule
 const processBreaks = require('../utils/r25wsResponseHandler').processBreaks
+const processEmpty = require('../utils/r25wsResponseHandler').processEmpty
 
 describe('processSchedule(results, command)', function () {
 
@@ -146,6 +147,17 @@ describe('processBreaks(results, command)', function () {
     })
     expect(breaks.attachments).to.be.undefined
     expect(breaks.text).to.equal('No further short breaks. Last booking in SPACE ends/ended at ' + e2_fortyMinFuture)
+  })
+})
+
+describe('processEmpty(command)', function () {
+  it('should create an in_channel response with error text', function () {
+    const command = {
+      resolvedCommandText: 'error text'
+    }
+    const data = processEmpty(command)
+    expect(data.response_type).to.equal('in_channel')
+    expect(data.text).to.equal(command.resolvedCommandText)
   })
 })
 

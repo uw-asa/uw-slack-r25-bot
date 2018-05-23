@@ -114,7 +114,7 @@ function processBreaks(results, command) {
     } else {
       responseData['text'] = 'Next Break for ' + command.querySpace
       let singleBreak = [breaks[nextBreakIndex]] // make an array copy, only keeping the desired break item.
-      console.log('index: ' + nextBreakIndex)
+      // console.log('index: ' + nextBreakIndex)
       responseData['attachments'] = singleBreak
     }
   }
@@ -122,7 +122,15 @@ function processBreaks(results, command) {
   return responseData
 }
 
+function processEmpty(command) {
+  return {
+    'response_type': 'in_channel',
+    'text': command.resolvedCommandText
+  }
+}
+
 module.exports = {
   processSchedule,
-  processBreaks
+  processBreaks,
+  processEmpty
 }
