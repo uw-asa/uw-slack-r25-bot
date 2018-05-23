@@ -102,7 +102,7 @@ function getTimesForId(command, callback) {
         console.log('Error', error.message)
       }
       console.log(error.config)
-      callback(error)
+      callback(null)
     })
   // end GET
 }
