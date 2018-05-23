@@ -51,30 +51,36 @@ function getTimesForId(command, callback) {
   axios.get(resourceUrl, queryData)
     .then(function(response) {
       // console.log(response)
-      console.log(response.status)
-      console.log(response.statusText)
+      console.log('response status: ' + response.status)
+      console.log('res status text: ' + response.statusText)
       // console.log(response.data)
       // parse response xml, trimming namespace tags out
       parseString(response.data, { tagNameProcessors: [stripNS], mergeAttrs: true }, function (err, result) {
         if (err) {
           console.log(err)
-        }
-        var reservationsRoot = result.space_reservations.space_reservation
-        var schedule = [] // Array of event objects to be sent back to callback function
-        // if the returned data can't be parsed, or is an empty response...
-        if (reservationsRoot === undefined) {
-          callback(null)
         } else {
-          reservationsRoot.forEach(function (el) {
-            var event = {
-              name: el.event_name[0],
-              startTime: datetimeUtils.getTimeFromDateTime(el.reservation_start_dt[0]),
-              endTime: datetimeUtils.getTimeFromDateTime(el.reservation_end_dt[0])
+          var schedule = [] // Array of event objects to be sent back to callback function
+          // if the returned data can't be parsed, or is an empty response...)
+          if (result.space_reservations === undefined) {
+            callback(null)
+          } else {
+            if (result.space_reservations.hasOwnProperty('space_reservation')) {
+              const reservationsRoot = result.space_reservations.space_reservation
+              try {
+                reservationsRoot.forEach(function (el) {
+                  var event = {
+                    name: el.event_name[0],
+                    startTime: datetimeUtils.getTimeFromDateTime(el.reservation_start_dt[0]),
+                    endTime: datetimeUtils.getTimeFromDateTime(el.reservation_end_dt[0])
+                  }
+                  schedule.push(event)
+                })
+              } catch (err) {
+                console.log(err)
+              }
             }
-            schedule.push(event)
-          })
-          // console.log(schedule)
-          callback(schedule)
+            callback(schedule)
+          }
         }
       })
     })
