@@ -2,6 +2,10 @@
 node_modules
 jspm_packages
 
+# testing output
+/.nyc_output
+/coverage
+
 # Serverless directories - Secrets - do not publish!
 .serverless
 
