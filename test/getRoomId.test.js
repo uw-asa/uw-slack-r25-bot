@@ -10,6 +10,15 @@ describe('getRoomId(roomQuery)', function () {
     expect(ANDid).to.equal('4587')
 
   })
+  
+  it('should load the json list of rooms and return the id or null - eeb/ece 003', function () {
+    var queryAND = 'ECE 003'
+
+    var ECE003id = getRoomId(queryAND)
+
+    expect(ECE003id).to.equal('4779')
+
+  })
 
   it('should find the id for WFS 201', function () {
     var queryWFS = 'WFS 201'
