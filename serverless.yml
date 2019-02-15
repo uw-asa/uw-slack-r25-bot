@@ -16,7 +16,7 @@ service: uw-slackr25bot # NOTE: update this with your service name
 custom:
   snsTopic: dispatchR25-${self:custom.stage}
   region: us-west-2
-  stage: prod
+  stage: prod # Change this to 'dev' or 'prod' or use the --stage: option from the command line
   timezone: 'America/Los_Angeles'
 
 provider:

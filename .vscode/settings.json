@@ -10,5 +10,6 @@
         "wspass",
         "wsrooturl",
         "wsuser"
-    ]
+    ],
+    "mocha.files.glob": "test/*.test.js"
 }
