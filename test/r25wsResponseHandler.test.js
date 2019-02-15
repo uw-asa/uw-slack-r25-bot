@@ -1,9 +1,15 @@
 
 const expect = require('chai').expect
 
-const processSchedule = require('../utils/r25wsResponseHandler').processSchedule
-const processBreaks = require('../utils/r25wsResponseHandler').processBreaks
-const processEmpty = require('../utils/r25wsResponseHandler').processEmpty
+const {
+  processSchedule,
+  processBreaks,
+  processEmpty,
+} = require('../utils/r25wsResponseHandler')
+const {
+  LOCALE,
+  LOCALE_OPTIONS,
+} = require('../utils/datetimeUtils')
 
 describe('processSchedule(results, command)', function () {
 
@@ -70,6 +76,25 @@ describe('processBreaks(results, command)', function () {
     expect(breaks.attachments.length).to.equal(testData.validExample.results.length - 1)
   })
 
+  it('Expect \'Only one booking...\' with booking detail for all breaks request but only one event scheduled.', function() {
+    // Destructure local test data for easier variable comparison
+    const {
+      validSingleExample: {
+        results
+      }
+    } = testData
+    var breaks = processBreaks(results, {
+      querySpace: 'ARC 147',
+      args: {
+        allBreaks: true
+      }
+    })
+    expect(breaks.response_type).to.equal('in_channel')
+    expect(breaks.text).to.equal('Breaks for ARC 147')
+    expect(breaks.attachments[0].title).to.equal(`Only one booking today: ${results[0].name}`)
+    expect(breaks.attachments[0].text).to.equal(`*Start Time:* ${results[0].startTime} | *End Time:* ${results[0].endTime}`)
+  })
+
   it('Expect number of returned breaks to = # of events -2 for list with 1 cross-listed event', function () {
     var breaks = processBreaks(testData.validCrossListExample.results, {
       querySpace: 'ARC 147',
@@ -83,12 +108,12 @@ describe('processBreaks(results, command)', function () {
   it('Expect next break to return the next break in a list of events', function () {
     // this is a tricky test, as the test data must be generated relative to the current time the test is run for accuracy.
     let currentEpoch = new Date().getTime()
-    let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString()
-    let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString()
-    let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString()
-    let e2_fortyMinFuture = new Date(currentEpoch + 2400000).toLocaleTimeString()
-    let s3_fiftyMinFuture = new Date(currentEpoch + 3000000).toLocaleTimeString()
-    let e3_hundredMinFuture = new Date(currentEpoch + 6000000).toLocaleTimeString()
+    let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let e2_fortyMinFuture = new Date(currentEpoch + 2400000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let s3_fiftyMinFuture = new Date(currentEpoch + 3000000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let e3_hundredMinFuture = new Date(currentEpoch + 6000000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     var results = [
       {
         name: 'Past Event',
@@ -121,10 +146,10 @@ describe('processBreaks(results, command)', function () {
   it('Expect to receive message about the last break ending if there are events, but all breaks have passed.', function () {
     // like above, all times must be manufactured to be relative to test run time.
     let currentEpoch = new Date().getTime()
-    let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString()
-    let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString()
-    let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString()
-    let e2_fortyMinFuture = new Date(currentEpoch + 2400000).toLocaleTimeString()
+    let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let e2_fortyMinFuture = new Date(currentEpoch + 2400000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     var results = [
       {
         name: 'Past Event',
@@ -168,6 +193,19 @@ const testData = {
     command: {
       querySpace: '',
       queryDateStr: null
+    }
+  },
+  validSingleExample: {
+    results: [
+      {
+        name: 'MATH 124 A',
+        startTime: '09:30:00',
+        endTime: '10:20:00' 
+      },
+    ],
+    command: {
+      querySpace: 'ARC 147',
+      queryDateStr: '02/14/2019'
     }
   },
   validExample: {

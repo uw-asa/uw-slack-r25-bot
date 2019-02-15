@@ -84,6 +84,14 @@ Environment variables are stored as .json files in a folder named 'env-vars' in 
 
 Automated testing implemented with [Mocha](https://mochajs.org/) and [Chai](http://www.chaijs.com/). These tests ensure that basic functionality continues to work properly. Setting the stage in `serverless.yml` to 'dev' allows for testing on a remote server without affecting production instance(s). Set up a separate 'team' on Slack, and create a custom integration app for testing out / development and use the separate slack token for access. More than one stage of the program can also be deployed to Lambda simultaneously, as each deployment will create a separate endpoint on AWS.
 
+## Updates
+
+### Deploying new versions
+
+From a terminal in the project root, run `serverless deploy [function -f {function_name}]`.
+
+**NOTE** The stage **DOES NOT** override what is saved in the serverless configuration file (`serverless.yml`)!
+
 ## Contributing
 
 All contributions, issues/bug reports, and questions are welcome.

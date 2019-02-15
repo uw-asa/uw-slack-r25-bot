@@ -9,7 +9,12 @@
  */
 
 // local utilities
-const timeStrDiffMin = require('./datetimeUtils').timeStrDiffMin
+// const timeStrDiffMin = require('./datetimeUtils').timeStrDiffMin
+const {
+  timeStrDiffMin,
+  LOCALE,
+  LOCALE_OPTIONS,
+} = require('./datetimeUtils')
 
 /**
  * Takes an array of event objects and processes them into a schedule with the name of the event and 
@@ -69,28 +74,36 @@ function processBreaks(results, command) {
     })
 
     // collect current time for next break determination
-    var nowTimeStr = new Date().toLocaleTimeString()
+    var nowTimeStr = new Date().toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     // console.log('nowtime: ' + nowTimeStr)
 
+    if (eventCount === 1) {
+      breaks.push({
+        'title': `Only one booking today: ${eventTitles[0]}`,
+        'text': `*Start Time:* ${startTimeStr[0]} | *End Time:* ${endTimeStr[0]}`,
+        'mrkdwn_in': [ 'text' ]
+      })
+    } else {
     // go through event start and end times to calculate inter-event breaks.
     // this loop could uses two variables to iterate through the lists for clarity.
-    for (var s = 1, e = 0; s < startTimeStr.length; s++, e++) {
-      var breakLengthMin = timeStrDiffMin(endTimeStr[e], startTimeStr[s])
-      var timeToBreakMin = timeStrDiffMin(nowTimeStr, endTimeStr[e])
-      if (breakLengthMin > 0) {
-        if (timeToBreakMin > 0 && nextBreakIndex === null) {
-          // only set the next break index once. The current length before the push below will
-          // later become the index to look up after the push.
-          // this also changes nextBreakIndex from null to a real value, so it won't be set again.
-          nextBreakIndex = breaks.length
-        }
+      for (var s = 1, e = 0; s < startTimeStr.length; s++, e++) {
+        var breakLengthMin = timeStrDiffMin(endTimeStr[e], startTimeStr[s])
+        var timeToBreakMin = timeStrDiffMin(nowTimeStr, endTimeStr[e])
+        if (breakLengthMin > 0) {
+          if (timeToBreakMin > 0 && nextBreakIndex === null) {
+            // only set the next break index once. The current length before the push below will
+            // later become the index to look up after the push.
+            // this also changes nextBreakIndex from null to a real value, so it won't be set again.
+            nextBreakIndex = breaks.length
+          }
 
-        // add each break period to the list of breaks (Slack Attachment format)
-        breaks.push({
-          'title': 'Break between ' + eventTitles[e] + ' and ' + eventTitles[s],
-          'text': endTimeStr[e] + ' to ' + startTimeStr[s] + ' *(' + breakLengthMin + ' mins)*',
-          'mrkdwn_in': [ 'text' ]
-        })
+          // add each break period to the list of breaks (Slack Attachment format)
+          breaks.push({
+            'title': 'Break between ' + eventTitles[e] + ' and ' + eventTitles[s],
+            'text': endTimeStr[e] + ' to ' + startTimeStr[s] + ' *(' + breakLengthMin + ' mins)*',
+            'mrkdwn_in': [ 'text' ]
+          })
+        }
       }
     }
   } else { // no events = no breaks

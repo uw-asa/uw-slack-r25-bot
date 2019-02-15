@@ -11,6 +11,9 @@
 const MS_IN_DAY = 86400000
 const MS_IN_MINUTE = 60000
 const LOCALE = 'en-US'
+const LOCALE_OPTIONS = {
+  hour12: false,
+}
 
 /**
  * Returns the time component of a datetime string without any timezone info.
@@ -20,7 +23,7 @@ const LOCALE = 'en-US'
 function getTimeFromDateTime(dateTimeStr) {
   dateTimeStr = dateTimeStr.slice(0, -6) // strip timezone
   var date = new Date(dateTimeStr)
-  return date.toLocaleTimeString()
+  return date.toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
 }
 
 /**
@@ -32,9 +35,9 @@ function getDateStrFromDayDelta(deltaStr) {
   if (deltaStr[0] == '+' && deltaStr.length > 1 && !isNaN(parseInt(deltaStr.slice(1)))) {
     var timeDiffMs = parseInt(deltaStr.slice(1)) * MS_IN_DAY
     var todayEpoch = new Date().getTime()
-    return new Date(todayEpoch + timeDiffMs).toLocaleDateString(LOCALE)
+    return new Date(todayEpoch + timeDiffMs).toLocaleDateString(LOCALE, LOCALE_OPTIONS)
   } else {
-    return new Date().toLocaleDateString(LOCALE)
+    return new Date().toLocaleDateString(LOCALE, LOCALE_OPTIONS)
   }
 }
 
@@ -62,5 +65,7 @@ function timeStrDiffMin(beginTime, endTime) {
 module.exports = { 
   getTimeFromDateTime,
   getDateStrFromDayDelta,
-  timeStrDiffMin
+  timeStrDiffMin,
+  LOCALE,
+  LOCALE_OPTIONS
 }
