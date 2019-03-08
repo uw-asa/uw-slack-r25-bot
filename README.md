@@ -92,6 +92,10 @@ From a terminal in the project root, run `serverless deploy [function -f {functi
 
 **NOTE** The stage **DOES NOT** override what is saved in the serverless configuration file (`serverless.yml`)!
 
+#### Updates to spaces / space ids
+
+Updating `spaces.json` requires updating the **parse** function.
+
 ## Contributing
 
 All contributions, issues/bug reports, and questions are welcome.
