@@ -21,7 +21,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
   memorySize: 128 # optional; 64 MB increments; range: 128-3008
   timeout: 30 # optional; in seconds; default = 6
   reservedConcurrency: 10 # optional, reserved concurrency limit for this function. By default, AWS uses account concurrency limit
