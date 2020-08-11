@@ -21,17 +21,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Env Secrets
-    - shell: bash
-      env:
-        R25_USER: ${{ secrets.R25_USER }}
-        R25_PASS: ${{ secrets.R25_PASS }}
-        R25_BASEURL: ${{ secrets.R25_BASEURL }}
       run: |
         mkdir env-vars && cd env-vars && echo "{
           \"user\": \"$R25_USER\",
           \"password\": \"$R25_PASS\",
           \"baseUrl\": \"$R25_BASEURL\"
         }" >> r25ws.json
+      env:
+        R25_USER: ${{ secrets.R25_USER }}
+        R25_PASS: ${{ secrets.R25_PASS }}
+        R25_BASEURL: ${{ secrets.R25_BASEURL }}
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
