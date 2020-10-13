@@ -1,6 +1,6 @@
 {
   "name": "uw-slackr25",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "AWS/Lambda Function to give Slack R25 room reservation time data",
   "main": "handler.js",
   "directories": {
@@ -13,7 +13,7 @@
   "author": "Chase Sawyer (chase.sawyer@pm.me)",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.730.0",
+    "aws-sdk": "^2.770.0",
     "axios": "^0.20.0",
     "xml2js-parser": "^1.1.1"
   },
