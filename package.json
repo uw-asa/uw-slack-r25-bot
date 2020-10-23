@@ -1,6 +1,6 @@
 {
   "name": "uw-slackr25",
-  "version": "2.3.4",
+  "version": "2.3.6",
   "description": "AWS/Lambda Function to give Slack R25 room reservation time data",
   "main": "handler.js",
   "directories": {
@@ -20,6 +20,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^6.2.2",
-    "serverless": "^1.78.1"
+    "serverless": "^2.8.0",
+    "simple-mock": "^0.8.0"
   }
 }

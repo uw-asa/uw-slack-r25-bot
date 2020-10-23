@@ -1,5 +1,6 @@
 
 const expect = require('chai').expect
+const simpleMock = require('simple-mock')
 
 const {
   processSchedule,
@@ -105,9 +106,10 @@ describe('processBreaks(results, command)', function () {
     expect(breaks.attachments.length).to.equal(testData.validCrossListExample.results.length - 2)
   })
 
-  it('Expect next break to return the next break in a list of events', function () {
+  it('Expect "next break" to return the next break in a list of events if run in between those events', function () {
     // this is a tricky test, as the test data must be generated relative to the current time the test is run for accuracy.
-    let currentEpoch = new Date().getTime()
+    simpleMock.mock(global.Date, 'now', new Date().setHours(12))
+    let currentEpoch = new Date(Date.now).getTime()
     let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
@@ -141,6 +143,49 @@ describe('processBreaks(results, command)', function () {
     expect(breaks.attachments.length).to.equal(1)
     expect(breaks.attachments[0].title).to.equal('Break between Current Event and Next Event')
     expect(breaks.attachments[0].text).to.equal(e2_fortyMinFuture + ' to ' + s3_fiftyMinFuture + ' *(10 mins)*')
+    simpleMock.restore()
+  })
+
+  it('Expect "next break" to return no further events when run near midnight (technically a bug)', function () {
+    // This test is actually validating a bug - but validates the current state of affairs. Eventually it will need to be replaced when the
+    // underlying code that calculates breaks and events takes into account events spanning midnight.
+    simpleMock.mock(global.Date, 'now', new Date().setHours(23)) // set time 1 hour before midnight
+    let currentEpoch = new Date(Date.now).getTime()
+    let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let e2_fortyMinFuture = new Date(currentEpoch + 2400000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let s3_fiftyMinFuture = new Date(currentEpoch + 3000000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    let e3_hundredMinFuture = new Date(currentEpoch + 6000000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    var results = [
+      {
+        name: 'Past Event',
+        startTime: s1_seventyMinAgo,
+        endTime: e1_twentyMinAgo
+      },
+      {
+        name: 'Current Event',
+        startTime: s2_tenMinAgo,
+        endTime: e2_fortyMinFuture
+      },
+      {
+        name: 'Next Event',
+        startTime: s3_fiftyMinFuture,
+        endTime: e3_hundredMinFuture
+      }
+    ]
+    // with relative results generated, we can formulate the next break command, and check result
+    const spaceName = 'TEST SPACE'
+    var breaks = processBreaks(results, {
+      querySpace: spaceName,
+      args: {
+        allBreaks: false
+      }
+    })
+    // TODO: fix this behavior around events close to/spanning midnight.
+    expect(breaks).not.to.have.property('attachments')
+    expect(breaks.text).to.equal('No further short breaks. Last booking in ' + spaceName + ' ends/ended at ' + e3_hundredMinFuture)
+    simpleMock.restore()
   })
 
   it('Expect to receive message about the last break ending if there are events, but all breaks have passed.', function () {

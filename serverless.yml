@@ -98,7 +98,6 @@ functions:
       - http:
           path: r25
           method: post
-          integration: lambda-proxy
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
 #      - sns: greeter-topic
