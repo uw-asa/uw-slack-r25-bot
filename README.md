@@ -82,7 +82,11 @@ Environment variables are stored as .json files in a folder named 'env-vars' in 
 
 ### Testing / Dev instancing
 
-Automated testing implemented with [Mocha](https://mochajs.org/) and [Chai](http://www.chaijs.com/). These tests ensure that basic functionality continues to work properly. Setting the stage in `serverless.yml` to 'dev' allows for testing on a remote server without affecting production instance(s). Set up a separate 'team' on Slack, and create a custom integration app for testing out / development and use the separate slack token for access. More than one stage of the program can also be deployed to Lambda simultaneously, as each deployment will create a separate endpoint on AWS.
+Automated testing implemented with [Mocha](https://mochajs.org/), [Chai](http://www.chaijs.com/), and [simple-mock](https://github.com/jupiter/simple-mock). CI integrated on github (github actions). These tests ensure that basic functionality continues to work properly. Setting the stage in `serverless.yml` to 'dev' allows for testing on a remote server without affecting production instance(s). Set up a separate 'team' on Slack, and create a custom integration app for testing out / development and use the separate slack token for access. More than one stage of the program can also be deployed to Lambda simultaneously, as each deployment will create a separate endpoint on AWS.
+
+#### Run Tests
+
+> `npm run test`
 
 #### Github Actions
 
@@ -92,7 +96,7 @@ Automated testing enabled on github actions. Secrets are saved on github under t
 
 ### Deploying new versions
 
-From a terminal in the project root, run `serverless deploy [function -f {function_name}]`.
+From a terminal in the project root, run `npx sls deploy [function -f {function_name}]`. `npx` ensures that the local installation of serverless is used, rather than any possible globally-installed version (`sls` is an alias for `serverless`).
 
 **NOTE** The stage **DOES NOT** override what is saved in the serverless configuration file (`serverless.yml`)! Update the stage setting in the file to either "dev" or "prod" before running the above deploy command.
 
