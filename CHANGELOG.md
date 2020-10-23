@@ -1,5 +1,82 @@
 # Changes
 
+## Version 2.3.6
+
+- Fixed vscode run configuration to debug tests
+- Discovered issue handling events spanning midnight via tests that fail because functions don't take into account the date.
+  - Issue #14 raised
+  - Fixed broken tests to be consistent regardless of the actual time that the tests are run by manipulating the global time.
+    - Fix changed `r25wsResponseHandler.js` and related `r25wsResponseHandler.test.js`
+  - confirmed that local and CI tests now pass
+
+## Version 2.3.5 (squashed into 2.3.6)
+
+- Updated serverless dependency
+  - Changed `serverless.yml` to remove events.http.integration
+
+## Version 2.3.4
+
+- Updated aws-sdk dependency
+
+## Version 2.3.3
+
+- Updated axios dependency
+
+## Version 2.3.2
+
+- ⚙ Added CI via Github Actions
+  - Tests against Node.js v10 and v12
+  - Runs for PRs against master branch, and master branch commits
+
+### Dependency updates
+
+- aws-sdk
+- mocha
+- serverless
+- axios
+
+### Runtime Change ⚠
+
+- No more support for Node 8.10 on AWS Lambda. Set runtime to nodejs 12.
+
+## Version 2.3.1
+
+- Added locale control to ensure that date/time parsing presents the correct data (specify use of 24 hour time format)
+- Added condition to r25wsResponseHandler.processBreaks() that returns a different message if there's only one booking on the specified day. (6eb1c58)
+
+- Updated dependencies
+  - aws-sdk
+  - axios
+  - mocha
+  - serverless
+- Updated readme
+  - Instructions on how to update space IDs so that the parse function is aware of the changes.
+
+### Spaces edits
+
+- Updated room names for CSE2
+
+## Version 2.3.0
+
+- Updated getRoomId.test.js
+- Added note to `serverless.yml` regarding needing to set the stage before deployment
+- Fixed `node_modules` gitignore setting
+
+### Spaces edits
+
+- Added eeb/ece 003 to spaces list
+- Fixed space ID for EEB/ECE 045
+
+## Version 2.2.0
+
+- Updated spaces IDs
+- Added coverage dirs. to gitignore
+- Updated dependencies
+  - aws-sdk
+  - serverless
+  - mocha
+  - chai
+
 ## Version 2.1
 
 - Added documentation for all functions and files
