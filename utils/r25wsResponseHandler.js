@@ -74,7 +74,7 @@ function processBreaks(results, command) {
     })
 
     // collect current time for next break determination
-    var nowTimeStr = new Date().toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    var nowTimeStr = new Date(Date.now).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     // console.log('nowtime: ' + nowTimeStr)
 
     if (eventCount === 1) {
