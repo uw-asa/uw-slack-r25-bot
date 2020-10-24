@@ -149,7 +149,7 @@ describe('processBreaks(results, command)', function () {
   it('Expect "next break" to return no further events when run near midnight (technically a bug)', function () {
     // This test is actually validating a bug - but validates the current state of affairs. Eventually it will need to be replaced when the
     // underlying code that calculates breaks and events takes into account events spanning midnight.
-    simpleMock.mock(global.Date, 'now', new Date().setHours(23)) // set time 1 hour before midnight
+    simpleMock.mock(global.Date, 'now', new Date().setHours(23, 30)) // set time 30 min before midnight
     let currentEpoch = new Date(Date.now).getTime()
     let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
