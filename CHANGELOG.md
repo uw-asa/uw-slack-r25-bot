@@ -1,5 +1,11 @@
 # Changes
 
+## Version 2.3.7
+
+### Dependencies
+
+- Updated mocha 2 major versions (from 6 to 8)
+
 ## Version 2.3.6
 
 - Fixed vscode run configuration to debug tests
