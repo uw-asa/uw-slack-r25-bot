@@ -9,7 +9,6 @@
  */
 
 // local utilities
-// const timeStrDiffMin = require('./datetimeUtils').timeStrDiffMin
 const {
   timeStrDiffMin,
   LOCALE,
@@ -19,25 +18,99 @@ const {
 /**
  * Takes an array of event objects and processes them into a schedule with the name of the event and 
  * the start and end times. The output is in the format of a Slack message where each event is 
- * in an attachment - the order of the results passed is the order in which they are posted (no sorting)
+ * in an attachment - the order of the results passed is the order in which they are posted (no sorting).
+ * Will also take into account the "NOW" command and return only what's happening at the time of the request.
  * @param {Array} results Event objects describing event names, start, and end times. 
  * @param {JSON} command Parsed command info
  * @returns {JSON} Data formatted for posting to Slack.
  */
 function processSchedule(results, command) {
   var schedule = [] //list of event describing objects
+  let overallReplyText = ''
   const eventCount = results.length
   // console.log(results)
   if (eventCount > 0) {
-    results.forEach(function (item) {
-      // console.log(item)
-      schedule.push({
-        'title': item.name,
-        'text': '*Start Time:* ' + item.startTime + ' | *End Time:* ' + item.endTime,
-        'mrkdwn_in': [ 'text' ]
+    if (command.args.limitNow) { // if true, user just wants what's happening this moment
+      
+      // get the current time for calculating what event is happening right now (if any)
+      const nowTimeStr = new Date(Date.now).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+      const events = {
+        titles: [],
+        startTimes: [],
+        endTimes: []
+      }
+      results.forEach((item) => {
+        events.titles.push(item.name)
+        events.startTimes.push(item.startTime)
+        events.endTimes.push(item.endTime)
       })
-    })
+      /* already know there's at least one event; There's 4 cases of things that could be happening:
+       * 1. An event is happening now (startTime[n] < 'now' < endTime[n])
+       * 2. All events already happened ('now' is > endTime[eventCount-1] (last event))
+       * 3. All events are in the future ('now' < startTime[0])
+       * 4. In between two events ('now' is actually a break between 2 events)
+       */
+      for (let i = 0; i < eventCount; i++) {
+        const diffStart = timeStrDiffMin(nowTimeStr, events.startTimes[i]) // negative if startTime in past
+        const diffEnd = timeStrDiffMin(nowTimeStr, events.endTimes[i]) // positive if endTime in future
+        // case 3: everything in the future (only possible if i == 0)
+        if (0 < diffStart && 0 < diffEnd && i == 0) {
+          overallReplyText = 'Nothing happening yet. First event (below) starting in ' + diffStart + ' minutes. (' + eventCount + ' total events)'
+          schedule.push({
+            'title': events.titles[i],
+            'text': '*Start Time:* ' + events.startTime[i] + ' | *End Time:* ' + events.endTimes[i],
+            'mrkdwn_in': [ 'text' ]
+          })
+          break // exit loop early
+        // case 2: All events already happened (on the last iteration and diffEnd is negative)
+        } else if (i == eventCount-1 && 0 >= diffEnd) {
+          overallReplyText = 'All events have passed. Last event (below) was: (' + eventCount + ' total events)'
+          schedule.push({
+            'title': events.titles[i],
+            'text': '*Start Time:* ' + events.startTime[i] + ' | *End Time:* ' + events.endTimes[i],
+            'mrkdwn_in': [ 'text' ]
+          })
+        // case 4: It's a break between events
+        // True if: both current start and end times are in the past AND start time of the next event is in the future
+        } else if (0 > diffStart && 0 > diffEnd && i < eventCount-1) { // ensure there's still another event to check the start time of
+          const nextEventDiffStart = timeStrDiffMin(nowTimeStr, events.startTimes[i+1])
+          if (0 < nextEventDiffStart) {
+            overallReplyText = 'Currently in a break between two events. Next Event starts in ' + nextEventDiffStart + ' minutes.'
+            schedule.push({
+              'title': '(Previous) ' + events.titles[i],
+              'text': '*Start Time:* ' + events.startTime[i] + ' | *End Time:* ' + events.endTimes[i],
+              'mrkdwn_in': [ 'text' ]
+            })
+            schedule.push({
+              'title': '(Next) ' + events.titles[i+1],
+              'text': '*Start Time:* ' + events.startTime[i+1] + ' | *End Time:* ' + events.endTimes[i+1],
+              'mrkdwn_in': [ 'text' ]
+            })
+            break // exit loop early
+          }
+        // case 1: something is happening now
+        } else if (diffStart <= 0 && 0 < diffEnd) {
+          overallReplyText = 'Happening now in ' + command.querySpace + ' (' + eventCount + ' total events):'
+          schedule.push({
+            'title': events.titles[i],
+            'text': '*Start Time:* ' + events.startTime[i] + ' | *End Time:* ' + events.endTimes[i],
+            'mrkdwn_in': [ 'text' ]
+          })
+        }
+      }
+    } else { // show all events
+      overallReplyText = 'Events for ' + command.querySpace + ' on ' + command.queryDateStr + ' (' + eventCount + ' events):'
+      results.forEach(function (item) {
+        // console.log(item)
+        schedule.push({
+          'title': item.name,
+          'text': '*Start Time:* ' + item.startTime + ' | *End Time:* ' + item.endTime,
+          'mrkdwn_in': [ 'text' ]
+        })
+      })
+    }
   } else { //no events
+    overallReplyText = 'There are ' + eventCount + ' events in ' + command.querySpace + ' on ' + command.queryDateStr + '.'
     schedule.push({
       'title': 'Wide open!'
     })
@@ -45,7 +118,7 @@ function processSchedule(results, command) {
   // console.log(schedule)
   return { //data
     'response_type': 'in_channel',
-    'text': 'Events for ' + command.querySpace + ' on ' + command.queryDateStr + ' (' + eventCount + ' events):',
+    'text': overallReplyText,
     'attachments': schedule
   }
 }

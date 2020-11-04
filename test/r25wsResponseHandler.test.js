@@ -12,7 +12,7 @@ const {
   LOCALE_OPTIONS,
 } = require('../utils/datetimeUtils')
 
-describe('processSchedule(results, command)', function () {
+describe('r25wsResponseHandler.processSchedule(results, command)', function () {
 
   it('expect \'Wide open!\' on empty results', function () {
     var schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
@@ -25,16 +25,19 @@ describe('processSchedule(results, command)', function () {
       expect(schedule).to.have.all.keys(['response_type', 'text', 'attachments'])
     })
 
-  it('expect output text to reflect input values', function () {
+  it('expect output text to reflect input values (valid)', function () {
     var schedule = processSchedule(testData.validExample.results, testData.validExample.command)
     expect(schedule.text).to.equal(
       'Events for ' + testData.validExample.command.querySpace + ' on ' + testData.validExample.command.queryDateStr +
       ' (' +testData.validExample.results.length + ' events):')
+  })
 
-    schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
+  it('expect output text to reflect input values (empty/no events)', function () {
+    var schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
     expect(schedule.text).to.equal(
-      'Events for ' + testData.emptyValues.command.querySpace + ' on ' + testData.emptyValues.command.queryDateStr +
-      ' (' +testData.emptyValues.results.length + ' events):')
+      'There are ' + testData.emptyValues.results.length +
+      ' events in ' + testData.emptyValues.command.querySpace +
+      ' on ' + testData.emptyValues.command.queryDateStr + '.')
   })
 
   it('expect response type to always be \'in_channel\'', function () {
@@ -46,7 +49,7 @@ describe('processSchedule(results, command)', function () {
   })
 })
 
-describe('processBreaks(results, command)', function () {
+describe('r25wsResponseHandler.processBreaks(results, command)', function () {
   it('Expect \'Wide open!\' on empty results, with all breaks.', function () {
     var breaks = processBreaks(testData.emptyValues.results, {
       querySpace: '',
@@ -149,7 +152,7 @@ describe('processBreaks(results, command)', function () {
   it('Expect "next break" to return no further events when run near midnight (technically a bug)', function () {
     // This test is actually validating a bug - but validates the current state of affairs. Eventually it will need to be replaced when the
     // underlying code that calculates breaks and events takes into account events spanning midnight.
-    simpleMock.mock(global.Date, 'now', new Date().setHours(23)) // set time 1 hour before midnight
+    simpleMock.mock(global.Date, 'now', new Date().setHours(23, 15)) // set time 45 min before midnight
     let currentEpoch = new Date(Date.now).getTime()
     let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
@@ -237,7 +240,10 @@ const testData = {
     results: [],
     command: {
       querySpace: '',
-      queryDateStr: null
+      queryDateStr: null,
+      args: {
+        limitNow: false
+      }
     }
   },
   validSingleExample: {
@@ -250,7 +256,10 @@ const testData = {
     ],
     command: {
       querySpace: 'ARC 147',
-      queryDateStr: '02/14/2019'
+      queryDateStr: '02/14/2019',
+      args: {
+        limitNow: false
+      }
     }
   },
   validExample: {
@@ -278,7 +287,10 @@ const testData = {
     ],
     command: {
       querySpace: 'ARC 147',
-      queryDateStr: '04/17/2018'
+      queryDateStr: '04/17/2018',
+      args: {
+        limitNow: false
+      }
     }
   },
   validCrossListExample: {
