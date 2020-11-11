@@ -19,6 +19,13 @@ describe('r25wsResponseHandler.processSchedule(results, command)', function () {
     expect(schedule.attachments[0].title).to.equal('Wide open!')
   })
 
+  it('Expect \'Wide open!\' statement on empty results when requesting \'now\'', function () {
+    const schedule = processSchedule(testData.emptyValues.results, {
+      querySpace: '', queryDateStr: null, args: { limitNow: true }
+    })
+    expect(schedule.attachments[0].title).to.equal('Wide open!')
+  })
+
   it('expect the return structure to have keys \'response_type\', \'text\', and \'attachments\'.', 
     function() {
       var schedule = processSchedule(testData.validExample.results, testData.validExample.command)
@@ -46,6 +53,101 @@ describe('r25wsResponseHandler.processSchedule(results, command)', function () {
 
     schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
     expect(schedule.response_type).to.equal('in_channel')
+  })
+
+  /** Tests covering 'now' command suffix processing in the schedule handler
+   * Case 1: One event happening now.
+   */
+  it('Expect now event to be declared when run against list of events (artificial now time set)', function () {
+    simpleMock.mock(global.Date, 'now', new Date().setHours(14, 0)) // target third event in synthetic results
+    const command = {
+      querySpace: 'TEST',
+      queryDateStr: '01/01/0001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(testData.validExample.results, command)
+    simpleMock.restore() // undo changed time settings
+    expect(schedule.text).to.equal(
+      'Happening now in ' + command.querySpace + ' (' + testData.validExample.results.length + ' overall events):'
+    )
+    expect(schedule.attachments.length).to.equal(1)
+    const {
+      title,
+      text
+    } = schedule.attachments[0]
+    const {
+      name: resultName,
+      startTime: resultStart,
+      endTime: resultEnd
+    } = testData.validExample.results[2]
+    expect(title).to.equal(resultName)
+    expect(text).to.equal('*Start Time:* ' + resultStart + ' | *End Time:* ' + resultEnd)
+  })
+
+  it('Returns all events if multiple things happening at once ("now" command)', function () {
+    const sampleSet = testData.validCrossListExample.results
+    simpleMock.mock(global.Date, 'now', new Date().setHours(10, 0)) // target crosslist event in synthetic results
+    const command = {
+      querySpace: 'TEST',
+      queryDate: '01/01/0001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(sampleSet, command)
+    simpleMock.restore() // undo mocked time settings
+    expect(schedule.text).to.equal(
+      'Happening now in ' + command.querySpace + ' (' + sampleSet.length + ' overall events):'
+    )
+    expect(schedule.attachments.length).to.equal(2)
+    // check that both appropriate results are returned in the correct order
+    const resultsTitles = Array.from(schedule.attachments, (item) => item.title)
+    const checkTitles = Array.from(sampleSet, (item) => item.name)
+    expect(resultsTitles).to.have.ordered.members(checkTitles.slice(0, 2))
+  })
+
+  /** Case 2: All events already happened */
+  it('Should reply with last event when all events have passed ("now" command)', function () {
+    const sampleSet = testData.validExample.results
+    // set target time after all events in synthetic results
+    simpleMock.mock(global.Date, 'now', new Date().setHours(16, 0))
+    const command = {
+      querySpace: 'TEST',
+      queryDate: '01/01/2001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(sampleSet, command)
+    simpleMock.restore() // undo mocked time setting
+    expect(schedule.text).to.equal(
+      'All events have passed. Last event in ' + command.querySpace + ' was: (' + sampleSet.length + ' overall events)'
+    )
+    expect(schedule.attachments.length).to.equal(1)
+    expect(schedule.attachments[0].title).to.equal(sampleSet[sampleSet.length-1].name)
+  })
+
+  /** Case 3: All events in the future */
+  it('Should reply with first event when none have happened yet ("now" command)', function () {
+    const sampleSet = testData.validExample.results
+    // set target time before all events in synthetic results
+    simpleMock.mock(global.Date, 'now', new Date().setHours(5, 0))
+    const command = {
+      querySpace: 'TEST',
+      queryDate: '01/01/2001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(sampleSet, command)
+    simpleMock.restore() // undo mocked time setting
+    expect(schedule.text).to.match(
+      /^Nothing happening yet\. First event \(below\) starting in \d+ minutes\. \(\d+ overall events\)/
+    )
+    expect(schedule.attachments.length).to.equal(1)
+    expect(schedule.attachments[0].title).to.equal(sampleSet[0].name)
   })
 })
 
