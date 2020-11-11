@@ -19,6 +19,7 @@ const {
  * Takes an array of event objects and processes them into a schedule with the name of the event and 
  * the start and end times. The output is in the format of a Slack message where each event is 
  * in an attachment - the order of the results passed is the order in which they are posted (no sorting).
+ * *It is assumed* that the results are pre-sorted.
  * Will also take into account the "NOW" command and return only what's happening at the time of the request.
  * @param {Array} results Event objects describing event names, start, and end times. 
  * @param {JSON} command Parsed command info
@@ -45,7 +46,7 @@ function processSchedule(results, command) {
         events.endTimes.push(item.endTime)
       })
       /* already know there's at least one event; There's 4 cases of things that could be happening:
-       * 1. An event is happening now (startTime[n] < 'now' < endTime[n])
+       * 1. An event  is happening now (startTime[n] < 'now' < endTime[n]) (includes concurrent events)
        * 2. All events already happened ('now' is > endTime[eventCount-1] (last event))
        * 3. All events are in the future ('now' < startTime[0])
        * 4. In between two events ('now' is actually a break between 2 events)
@@ -53,21 +54,21 @@ function processSchedule(results, command) {
       for (let i = 0; i < eventCount; i++) {
         const diffStart = timeStrDiffMin(nowTimeStr, events.startTimes[i]) // negative if startTime in past
         const diffEnd = timeStrDiffMin(nowTimeStr, events.endTimes[i]) // positive if endTime in future
-        // case 3: everything in the future (only possible if i == 0)
+        // case 3: everything in the future (only possible if i == 0 and events are sorted chronologically)
         if (0 < diffStart && 0 < diffEnd && i == 0) {
-          overallReplyText = 'Nothing happening yet. First event (below) starting in ' + diffStart + ' minutes. (' + eventCount + ' total events)'
+          overallReplyText = 'Nothing happening yet. First event (below) starting in ' + Math.floor(diffStart) + ' minutes. (' + eventCount + ' overall events)'
           schedule.push({
             'title': events.titles[i],
-            'text': '*Start Time:* ' + events.startTime[i] + ' | *End Time:* ' + events.endTimes[i],
+            'text': '*Start Time:* ' + events.startTimes[i] + ' | *End Time:* ' + events.endTimes[i],
             'mrkdwn_in': [ 'text' ]
           })
           break // exit loop early
         // case 2: All events already happened (on the last iteration and diffEnd is negative)
         } else if (i == eventCount-1 && 0 >= diffEnd) {
-          overallReplyText = 'All events have passed. Last event (below) was: (' + eventCount + ' total events)'
+          overallReplyText = 'All events have passed. Last event in ' + command.querySpace + ' was: (' + eventCount + ' overall events)'
           schedule.push({
             'title': events.titles[i],
-            'text': '*Start Time:* ' + events.startTime[i] + ' | *End Time:* ' + events.endTimes[i],
+            'text': '*Start Time:* ' + events.startTimes[i] + ' | *End Time:* ' + events.endTimes[i],
             'mrkdwn_in': [ 'text' ]
           })
         // case 4: It's a break between events
@@ -78,22 +79,22 @@ function processSchedule(results, command) {
             overallReplyText = 'Currently in a break between two events. Next Event starts in ' + nextEventDiffStart + ' minutes.'
             schedule.push({
               'title': '(Previous) ' + events.titles[i],
-              'text': '*Start Time:* ' + events.startTime[i] + ' | *End Time:* ' + events.endTimes[i],
+              'text': '*Start Time:* ' + events.startTimes[i] + ' | *End Time:* ' + events.endTimes[i],
               'mrkdwn_in': [ 'text' ]
             })
             schedule.push({
               'title': '(Next) ' + events.titles[i+1],
-              'text': '*Start Time:* ' + events.startTime[i+1] + ' | *End Time:* ' + events.endTimes[i+1],
+              'text': '*Start Time:* ' + events.startTimes[i+1] + ' | *End Time:* ' + events.endTimes[i+1],
               'mrkdwn_in': [ 'text' ]
             })
             break // exit loop early
           }
-        // case 1: something is happening now
+        // case 1: an event (or events) is(are) happening now
         } else if (diffStart <= 0 && 0 < diffEnd) {
-          overallReplyText = 'Happening now in ' + command.querySpace + ' (' + eventCount + ' total events):'
+          overallReplyText = 'Happening now in ' + command.querySpace + ' (' + eventCount + ' overall events):'
           schedule.push({
             'title': events.titles[i],
-            'text': '*Start Time:* ' + events.startTime[i] + ' | *End Time:* ' + events.endTimes[i],
+            'text': '*Start Time:* ' + events.startTimes[i] + ' | *End Time:* ' + events.endTimes[i],
             'mrkdwn_in': [ 'text' ]
           })
         }
