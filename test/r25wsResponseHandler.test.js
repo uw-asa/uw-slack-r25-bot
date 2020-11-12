@@ -149,6 +149,38 @@ describe('r25wsResponseHandler.processSchedule(results, command)', function () {
     expect(schedule.attachments.length).to.equal(1)
     expect(schedule.attachments[0].title).to.equal(sampleSet[0].name)
   })
+
+  /** Case 4: Break in between events in the schedule */
+  it('Should return both preceding and succeeding events if "now" called during break', function () {
+    const sampleSet = testData.validExample.results
+    // set target time to a gap between events in synthetic results (result indexes 1,2)
+    simpleMock.mock(global.Date, 'now', new Date().setHours(13, 25))
+    const command = {
+      querySpace: 'Test',
+      queryDate: '02/25/2001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(sampleSet, command)
+    simpleMock.restore() // undo mocked time setting
+    expect(schedule.text).to.match(
+      /^Currently in a break between two events\. Next event starts in \d+ minutes\./
+    )
+    expect(schedule.attachments.length).to.equal(2)
+    // check that both appropriate results are returned in the correct order
+    const resultsTitles = Array.from(schedule.attachments, (item) => item.title)
+    let checkTitles = Array.from(sampleSet, (item) => item.name)
+    // modify local titles to have "(Previous)" and "(Next)" prefixes
+    checkTitles = checkTitles.slice(1 ,3)
+    checkTitles[0] = `(Previous) ${checkTitles[0]}`
+    checkTitles[1] = `(Next) ${checkTitles[1]}`
+    expect(resultsTitles).to.have.ordered.members(checkTitles)
+    // check that the times are appropriate and in the correct order
+    const resultsTimes = Array.from(schedule.attachments, (item) => item.text)
+    const checkTimes = Array.from(sampleSet, (item) => `*Start Time:* ${item.startTime} | *End Time:* ${item.endTime}`)
+    expect(resultsTimes).to.have.ordered.members(checkTimes.slice(1,3))
+  })
 })
 
 describe('r25wsResponseHandler.processBreaks(results, command)', function () {
