@@ -16,6 +16,16 @@ const {
 } = require('./datetimeUtils')
 
 /**
+ * Helper function that takes two times and marks them up for insertion into a slack message
+ * @param {String} startT start time string
+ * @param {String} endT end time string
+ * @returns markdown formatted string for Slack
+ */
+function startEndTimeFmt(startT, endT) {
+  return `*Start Time:* ${startT} | *End Time:* ${endT}`
+}
+
+/**
  * Takes an array of event objects and processes them into a schedule with the name of the event and 
  * the start and end times. The output is in the format of a Slack message where each event is 
  * in an attachment - the order of the results passed is the order in which they are posted (no sorting).
@@ -59,7 +69,7 @@ function processSchedule(results, command) {
           overallReplyText = 'Nothing happening yet. First event (below) starting in ' + Math.floor(diffStart) + ' minutes. (' + eventCount + ' overall events)'
           schedule.push({
             'title': events.titles[i],
-            'text': '*Start Time:* ' + events.startTimes[i] + ' | *End Time:* ' + events.endTimes[i],
+            'text': startEndTimeFmt(events.startTimes[i], events.endTimes[i]),
             'mrkdwn_in': [ 'text' ]
           })
           break // exit loop early
@@ -68,7 +78,7 @@ function processSchedule(results, command) {
           overallReplyText = 'All events have passed. Last event in ' + command.querySpace + ' was: (' + eventCount + ' overall events)'
           schedule.push({
             'title': events.titles[i],
-            'text': '*Start Time:* ' + events.startTimes[i] + ' | *End Time:* ' + events.endTimes[i],
+            'text': startEndTimeFmt(events.startTimes[i], events.endTimes[i]),
             'mrkdwn_in': [ 'text' ]
           })
         // case 4: It's a break between events
@@ -76,15 +86,15 @@ function processSchedule(results, command) {
         } else if (0 > diffStart && 0 > diffEnd && i < eventCount-1) { // ensure there's still another event to check the start time of
           const nextEventDiffStart = timeStrDiffMin(nowTimeStr, events.startTimes[i+1])
           if (0 < nextEventDiffStart) {
-            overallReplyText = 'Currently in a break between two events. Next Event starts in ' + nextEventDiffStart + ' minutes.'
+            overallReplyText = 'Currently in a break between two events. Next event starts in ' + Math.floor(nextEventDiffStart) + ' minutes.'
             schedule.push({
               'title': '(Previous) ' + events.titles[i],
-              'text': '*Start Time:* ' + events.startTimes[i] + ' | *End Time:* ' + events.endTimes[i],
+              'text': startEndTimeFmt(events.startTimes[i], events.endTimes[i]),
               'mrkdwn_in': [ 'text' ]
             })
             schedule.push({
               'title': '(Next) ' + events.titles[i+1],
-              'text': '*Start Time:* ' + events.startTimes[i+1] + ' | *End Time:* ' + events.endTimes[i+1],
+              'text': startEndTimeFmt(events.startTimes[i+1], events.endTimes[i+1]),
               'mrkdwn_in': [ 'text' ]
             })
             break // exit loop early
@@ -94,7 +104,7 @@ function processSchedule(results, command) {
           overallReplyText = 'Happening now in ' + command.querySpace + ' (' + eventCount + ' overall events):'
           schedule.push({
             'title': events.titles[i],
-            'text': '*Start Time:* ' + events.startTimes[i] + ' | *End Time:* ' + events.endTimes[i],
+            'text': startEndTimeFmt(events.startTimes[i], events.endTimes[i]),
             'mrkdwn_in': [ 'text' ]
           })
         }
@@ -105,7 +115,7 @@ function processSchedule(results, command) {
         // console.log(item)
         schedule.push({
           'title': item.name,
-          'text': '*Start Time:* ' + item.startTime + ' | *End Time:* ' + item.endTime,
+          'text': startEndTimeFmt(item.startTime, item.endTime),
           'mrkdwn_in': [ 'text' ]
         })
       })
