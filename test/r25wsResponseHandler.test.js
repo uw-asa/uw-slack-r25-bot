@@ -59,7 +59,8 @@ describe('r25wsResponseHandler.processSchedule(results, command)', function () {
    * Case 1: One event happening now.
    */
   it('Expect now event to be declared when run against list of events (artificial now time set)', function () {
-    simpleMock.mock(global.Date, 'now', new Date().setHours(14, 0)) // target third event in synthetic results
+    const tmpTime = new Date().setHours(14, 0) // target third event in synthetic results
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
     const command = {
       querySpace: 'TEST',
       queryDateStr: '01/01/0001',
@@ -86,9 +87,18 @@ describe('r25wsResponseHandler.processSchedule(results, command)', function () {
     expect(text).to.equal('*Start Time:* ' + resultStart + ' | *End Time:* ' + resultEnd)
   })
 
+  it('Returns valid response', function() {
+    const tmpTime = new Date().setHours(14, 30)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    const schedule = processSchedule(testData.validExampleTwo.results, testData.validExampleTwo.command)
+    expect(schedule.text).to.not.be.empty
+    simpleMock.restore()
+  })
+
   it('Returns all events if multiple things happening at once ("now" command)', function () {
     const sampleSet = testData.validCrossListExample.results
-    simpleMock.mock(global.Date, 'now', new Date().setHours(10, 0)) // target crosslist event in synthetic results
+    const tmpTime = new Date().setHours(10, 0) // target crosslist event in synthetic results
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
     const command = {
       querySpace: 'TEST',
       queryDate: '01/01/0001',
@@ -112,7 +122,8 @@ describe('r25wsResponseHandler.processSchedule(results, command)', function () {
   it('Should reply with last event when all events have passed ("now" command)', function () {
     const sampleSet = testData.validExample.results
     // set target time after all events in synthetic results
-    simpleMock.mock(global.Date, 'now', new Date().setHours(16, 0))
+    const tmpTime = new Date().setHours(16, 0)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
     const command = {
       querySpace: 'TEST',
       queryDate: '01/01/2001',
@@ -133,7 +144,8 @@ describe('r25wsResponseHandler.processSchedule(results, command)', function () {
   it('Should reply with first event when none have happened yet ("now" command)', function () {
     const sampleSet = testData.validExample.results
     // set target time before all events in synthetic results
-    simpleMock.mock(global.Date, 'now', new Date().setHours(5, 0))
+    const tmpTime = new Date().setHours(5, 0)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
     const command = {
       querySpace: 'TEST',
       queryDate: '01/01/2001',
@@ -154,7 +166,8 @@ describe('r25wsResponseHandler.processSchedule(results, command)', function () {
   it('Should return both preceding and succeeding events if "now" called during break', function () {
     const sampleSet = testData.validExample.results
     // set target time to a gap between events in synthetic results (result indexes 1,2)
-    simpleMock.mock(global.Date, 'now', new Date().setHours(13, 25))
+    const tmpTime = new Date().setHours(13, 25)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
     const command = {
       querySpace: 'Test',
       queryDate: '02/25/2001',
@@ -245,8 +258,9 @@ describe('r25wsResponseHandler.processBreaks(results, command)', function () {
 
   it('Expect "next break" to return the next break in a list of events if run in between those events', function () {
     // this is a tricky test, as the test data must be generated relative to the current time the test is run for accuracy.
-    simpleMock.mock(global.Date, 'now', new Date().setHours(12))
-    let currentEpoch = new Date(Date.now).getTime()
+    const tmpTime = new Date().setHours(12)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    let currentEpoch = new Date(Date.now()).getTime()
     let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
@@ -286,8 +300,9 @@ describe('r25wsResponseHandler.processBreaks(results, command)', function () {
   it('Expect "next break" to return no further events when run near midnight (technically a bug)', function () {
     // This test is actually validating a bug - but validates the current state of affairs. Eventually it will need to be replaced when the
     // underlying code that calculates breaks and events takes into account events spanning midnight.
-    simpleMock.mock(global.Date, 'now', new Date().setHours(23, 15)) // set time 45 min before midnight
-    let currentEpoch = new Date(Date.now).getTime()
+    const tmpTime = new Date().setHours(23, 15) // set time 45 min before midnight
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    let currentEpoch = new Date(Date.now()).getTime()
     let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
@@ -425,6 +440,36 @@ const testData = {
       args: {
         limitNow: false
       }
+    }
+  },
+  validExampleTwo: {
+    results: [
+      {
+        name: 'Music #8',
+        startTime: '09:30:00',
+        endTime: '10:30:00'
+      },
+      {
+        name: 'Music #6',
+        startTime: '11:30:00',
+        endTime: '12:30:00'
+      },
+      {
+        name: 'Music #4',
+        startTime: '14:00:00',
+        endTime: '15:00:00'
+      },
+      {
+        name: 'Music #9',
+        startTime: '15:30:00',
+        endTime: '17:20:00'
+      }
+    ],
+    command: {
+      roomId: '5116',
+      querySpace: 'mus 223',
+      queryDate: '11/12/2020',
+      args: { limitNow: true }
     }
   },
   validCrossListExample: {

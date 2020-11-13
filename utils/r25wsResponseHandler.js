@@ -44,7 +44,7 @@ function processSchedule(results, command) {
     if (command.args.limitNow) { // if true, user just wants what's happening this moment
       
       // get the current time for calculating what event is happening right now (if any)
-      const nowTimeStr = new Date(Date.now).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+      const nowTimeStr = new Date(Date.now()).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
       const events = {
         titles: [],
         startTimes: [],
@@ -158,7 +158,7 @@ function processBreaks(results, command) {
     })
 
     // collect current time for next break determination
-    var nowTimeStr = new Date(Date.now).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
+    var nowTimeStr = new Date(Date.now()).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     // console.log('nowtime: ' + nowTimeStr)
 
     if (eventCount === 1) {
