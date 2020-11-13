@@ -1,6 +1,6 @@
 {
   "name": "uw-slackr25",
-  "version": "2.3.7",
+  "version": "2.4.0",
   "description": "AWS/Lambda Function to allow access to R25 room reservation time data from Slack",
   "main": "handler.js",
   "directories": {
@@ -8,7 +8,8 @@
     "utilities": "utils"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "nyc mocha"
   },
   "author": "Chase Sawyer (chase.sawyer@pm.me)",
   "license": "MIT",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.2.0",
+    "nyc": "^15.1.0",
     "serverless": "^2.8.0",
     "simple-mock": "^0.8.0"
   }

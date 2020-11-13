@@ -64,7 +64,7 @@ function getTimesForId(command, callback) {
           if (result.space_reservations === undefined) {
             callback(null)
           } else {
-            if (result.space_reservations.hasOwnProperty('space_reservation')) {
+            if (Object.prototype.hasOwnProperty.call(result.space_reservations, 'space_reservation')) {
               const reservationsRoot = result.space_reservations.space_reservation
               try {
                 reservationsRoot.forEach(function (el) {

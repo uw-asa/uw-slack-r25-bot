@@ -12,10 +12,17 @@ const {
   LOCALE_OPTIONS,
 } = require('../utils/datetimeUtils')
 
-describe('processSchedule(results, command)', function () {
+describe('r25wsResponseHandler.processSchedule(results, command)', function () {
 
   it('expect \'Wide open!\' on empty results', function () {
     var schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
+    expect(schedule.attachments[0].title).to.equal('Wide open!')
+  })
+
+  it('Expect \'Wide open!\' statement on empty results when requesting \'now\'', function () {
+    const schedule = processSchedule(testData.emptyValues.results, {
+      querySpace: '', queryDateStr: null, args: { limitNow: true }
+    })
     expect(schedule.attachments[0].title).to.equal('Wide open!')
   })
 
@@ -25,16 +32,19 @@ describe('processSchedule(results, command)', function () {
       expect(schedule).to.have.all.keys(['response_type', 'text', 'attachments'])
     })
 
-  it('expect output text to reflect input values', function () {
+  it('expect output text to reflect input values (valid)', function () {
     var schedule = processSchedule(testData.validExample.results, testData.validExample.command)
     expect(schedule.text).to.equal(
       'Events for ' + testData.validExample.command.querySpace + ' on ' + testData.validExample.command.queryDateStr +
       ' (' +testData.validExample.results.length + ' events):')
+  })
 
-    schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
+  it('expect output text to reflect input values (empty/no events)', function () {
+    var schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
     expect(schedule.text).to.equal(
-      'Events for ' + testData.emptyValues.command.querySpace + ' on ' + testData.emptyValues.command.queryDateStr +
-      ' (' +testData.emptyValues.results.length + ' events):')
+      'There are ' + testData.emptyValues.results.length +
+      ' events in ' + testData.emptyValues.command.querySpace +
+      ' on ' + testData.emptyValues.command.queryDateStr + '.')
   })
 
   it('expect response type to always be \'in_channel\'', function () {
@@ -44,9 +54,149 @@ describe('processSchedule(results, command)', function () {
     schedule = processSchedule(testData.emptyValues.results, testData.emptyValues.command)
     expect(schedule.response_type).to.equal('in_channel')
   })
+
+  /** Tests covering 'now' command suffix processing in the schedule handler
+   * Case 1: One event happening now.
+   */
+  it('Expect now event to be declared when run against list of events (artificial now time set)', function () {
+    const tmpTime = new Date().setHours(14, 0) // target third event in synthetic results
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    const command = {
+      querySpace: 'TEST',
+      queryDateStr: '01/01/0001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(testData.validExample.results, command)
+    simpleMock.restore() // undo changed time settings
+    expect(schedule.text).to.equal(
+      'Happening now in ' + command.querySpace + ' (' + testData.validExample.results.length + ' overall events):'
+    )
+    expect(schedule.attachments.length).to.equal(1)
+    const {
+      title,
+      text
+    } = schedule.attachments[0]
+    const {
+      name: resultName,
+      startTime: resultStart,
+      endTime: resultEnd
+    } = testData.validExample.results[2]
+    expect(title).to.equal(resultName)
+    expect(text).to.equal('*Start Time:* ' + resultStart + ' | *End Time:* ' + resultEnd)
+  })
+
+  it('Returns valid response', function() {
+    const tmpTime = new Date().setHours(14, 30)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    const schedule = processSchedule(testData.validExampleTwo.results, testData.validExampleTwo.command)
+    expect(schedule.text).to.not.be.empty
+    simpleMock.restore()
+  })
+
+  it('Returns all events if multiple things happening at once ("now" command)', function () {
+    const sampleSet = testData.validCrossListExample.results
+    const tmpTime = new Date().setHours(10, 0) // target crosslist event in synthetic results
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    const command = {
+      querySpace: 'TEST',
+      queryDate: '01/01/0001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(sampleSet, command)
+    simpleMock.restore() // undo mocked time settings
+    expect(schedule.text).to.equal(
+      'Happening now in ' + command.querySpace + ' (' + sampleSet.length + ' overall events):'
+    )
+    expect(schedule.attachments.length).to.equal(2)
+    // check that both appropriate results are returned in the correct order
+    const resultsTitles = Array.from(schedule.attachments, (item) => item.title)
+    const checkTitles = Array.from(sampleSet, (item) => item.name)
+    expect(resultsTitles).to.have.ordered.members(checkTitles.slice(0, 2))
+  })
+
+  /** Case 2: All events already happened */
+  it('Should reply with last event when all events have passed ("now" command)', function () {
+    const sampleSet = testData.validExample.results
+    // set target time after all events in synthetic results
+    const tmpTime = new Date().setHours(16, 0)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    const command = {
+      querySpace: 'TEST',
+      queryDate: '01/01/2001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(sampleSet, command)
+    simpleMock.restore() // undo mocked time setting
+    expect(schedule.text).to.equal(
+      'All events have passed. Last event in ' + command.querySpace + ' was: (' + sampleSet.length + ' overall events)'
+    )
+    expect(schedule.attachments.length).to.equal(1)
+    expect(schedule.attachments[0].title).to.equal(sampleSet[sampleSet.length-1].name)
+  })
+
+  /** Case 3: All events in the future */
+  it('Should reply with first event when none have happened yet ("now" command)', function () {
+    const sampleSet = testData.validExample.results
+    // set target time before all events in synthetic results
+    const tmpTime = new Date().setHours(5, 0)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    const command = {
+      querySpace: 'TEST',
+      queryDate: '01/01/2001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(sampleSet, command)
+    simpleMock.restore() // undo mocked time setting
+    expect(schedule.text).to.match(
+      /^Nothing happening yet\. First event \(below\) starting in \d+ minutes\. \(\d+ overall events\)/
+    )
+    expect(schedule.attachments.length).to.equal(1)
+    expect(schedule.attachments[0].title).to.equal(sampleSet[0].name)
+  })
+
+  /** Case 4: Break in between events in the schedule */
+  it('Should return both preceding and succeeding events if "now" called during break', function () {
+    const sampleSet = testData.validExample.results
+    // set target time to a gap between events in synthetic results (result indexes 1,2)
+    const tmpTime = new Date().setHours(13, 25)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    const command = {
+      querySpace: 'Test',
+      queryDate: '02/25/2001',
+      args: {
+        limitNow: true
+      }
+    }
+    const schedule = processSchedule(sampleSet, command)
+    simpleMock.restore() // undo mocked time setting
+    expect(schedule.text).to.match(
+      /^Currently in a break between two events\. Next event starts in \d+ minutes\./
+    )
+    expect(schedule.attachments.length).to.equal(2)
+    // check that both appropriate results are returned in the correct order
+    const resultsTitles = Array.from(schedule.attachments, (item) => item.title)
+    let checkTitles = Array.from(sampleSet, (item) => item.name)
+    // modify local titles to have "(Previous)" and "(Next)" prefixes
+    checkTitles = checkTitles.slice(1 ,3)
+    checkTitles[0] = `(Previous) ${checkTitles[0]}`
+    checkTitles[1] = `(Next) ${checkTitles[1]}`
+    expect(resultsTitles).to.have.ordered.members(checkTitles)
+    // check that the times are appropriate and in the correct order
+    const resultsTimes = Array.from(schedule.attachments, (item) => item.text)
+    const checkTimes = Array.from(sampleSet, (item) => `*Start Time:* ${item.startTime} | *End Time:* ${item.endTime}`)
+    expect(resultsTimes).to.have.ordered.members(checkTimes.slice(1,3))
+  })
 })
 
-describe('processBreaks(results, command)', function () {
+describe('r25wsResponseHandler.processBreaks(results, command)', function () {
   it('Expect \'Wide open!\' on empty results, with all breaks.', function () {
     var breaks = processBreaks(testData.emptyValues.results, {
       querySpace: '',
@@ -108,8 +258,9 @@ describe('processBreaks(results, command)', function () {
 
   it('Expect "next break" to return the next break in a list of events if run in between those events', function () {
     // this is a tricky test, as the test data must be generated relative to the current time the test is run for accuracy.
-    simpleMock.mock(global.Date, 'now', new Date().setHours(12))
-    let currentEpoch = new Date(Date.now).getTime()
+    const tmpTime = new Date().setHours(12)
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    let currentEpoch = new Date(Date.now()).getTime()
     let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
@@ -149,8 +300,9 @@ describe('processBreaks(results, command)', function () {
   it('Expect "next break" to return no further events when run near midnight (technically a bug)', function () {
     // This test is actually validating a bug - but validates the current state of affairs. Eventually it will need to be replaced when the
     // underlying code that calculates breaks and events takes into account events spanning midnight.
-    simpleMock.mock(global.Date, 'now', new Date().setHours(23)) // set time 1 hour before midnight
-    let currentEpoch = new Date(Date.now).getTime()
+    const tmpTime = new Date().setHours(23, 15) // set time 45 min before midnight
+    simpleMock.mock(global.Date, 'now').returnWith(tmpTime)
+    let currentEpoch = new Date(Date.now()).getTime()
     let s1_seventyMinAgo = new Date(currentEpoch - 4200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let e1_twentyMinAgo = new Date(currentEpoch - 1200000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
     let s2_tenMinAgo = new Date(currentEpoch - 600000).toLocaleTimeString(LOCALE, LOCALE_OPTIONS)
@@ -237,7 +389,10 @@ const testData = {
     results: [],
     command: {
       querySpace: '',
-      queryDateStr: null
+      queryDateStr: null,
+      args: {
+        limitNow: false
+      }
     }
   },
   validSingleExample: {
@@ -250,7 +405,10 @@ const testData = {
     ],
     command: {
       querySpace: 'ARC 147',
-      queryDateStr: '02/14/2019'
+      queryDateStr: '02/14/2019',
+      args: {
+        limitNow: false
+      }
     }
   },
   validExample: {
@@ -278,7 +436,40 @@ const testData = {
     ],
     command: {
       querySpace: 'ARC 147',
-      queryDateStr: '04/17/2018'
+      queryDateStr: '04/17/2018',
+      args: {
+        limitNow: false
+      }
+    }
+  },
+  validExampleTwo: {
+    results: [
+      {
+        name: 'Music #8',
+        startTime: '09:30:00',
+        endTime: '10:30:00'
+      },
+      {
+        name: 'Music #6',
+        startTime: '11:30:00',
+        endTime: '12:30:00'
+      },
+      {
+        name: 'Music #4',
+        startTime: '14:00:00',
+        endTime: '15:00:00'
+      },
+      {
+        name: 'Music #9',
+        startTime: '15:30:00',
+        endTime: '17:20:00'
+      }
+    ],
+    command: {
+      roomId: '5116',
+      querySpace: 'mus 223',
+      queryDate: '11/12/2020',
+      args: { limitNow: true }
     }
   },
   validCrossListExample: {

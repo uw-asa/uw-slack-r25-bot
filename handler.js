@@ -2,7 +2,7 @@
 
 /* AWS Lambda function handler.js
  * Chase Sawyer
- * University of Washington, 2018
+ * University of Washington, 2018-2020
  * 
  * Defines two Lambda functions that make up two halves of the UW-SlackR25Bot slash command, '/r25'.
  * The parse handler parses an incoming Slack slash command through the AWS Gateway, and processes/validates
@@ -10,7 +10,9 @@
  * the command is valid, will fire off a SNS message that will trigger the second Lambda function.
  * The getTimes handler is triggered by the SNS message and takes the processed JSON command and response 
  * URL in it's event parameter. It fires off a function to the r25ws function which contacts the web service
- * to fulfill the command.
+ * to fulfill the command. The results from the R25 web service are then handed to a post-processing utility
+ * in r25wsResponseHandler.js which will look through the results and give back formatted JSON for the handler
+ * function here to pass back to Slack via postData().
  * 
  * Console is used to log data to AWS CloudWatch by default.
  */
@@ -149,6 +151,7 @@ function getTimes(event, context, callback) {
       command.resolvedCommandText = responseText.text['ERROR-R25WS-DOWN']
       data = responseHandler.processEmpty(command)
     } else {
+      // Here's where processor utilities get called based on the determined command
       if (command.resolvedCommand == 'SCHEDULE') {
         data = responseHandler.processSchedule(results, command)
       } else if (command.resolvedCommand == 'BREAKS') {
