@@ -1,5 +1,11 @@
 # Changes
 
+## Version 2.4.0
+
+### Feature added: "now" command suffix
+
+Users can now ask for exactly what is happening at the time of command invocation by suffixing the room number with "now". This returns one of several kinds of message: If there is one event (or multiple cross listed events) then they will be returned to the user, along with the overall day's totals. If all events are in the future/past in relation to "now", then the returned info will say how long until the next event is, or how long since the last event ended (and what those events are). Finally, if "now" is a break in between events, then the command will return both the preceding and succeeding events are and how long it will be until the next event.
+
 ## Version 2.3.7
 
 ### Dependencies
