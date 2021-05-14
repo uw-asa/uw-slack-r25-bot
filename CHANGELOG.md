@@ -1,5 +1,20 @@
 # Changes
 
+## Version 2.4.1 [2021-05-14]
+
+### Space Edits
+
+- Re-added PAR Rooms with their codes
+
+### Dependencies
+
+- Updated
+  - serverless
+  - chai
+  - mocha
+  - axios
+  - aws-sdk
+
 ## Version 2.4.0
 
 ### Feature added: "now" command suffix
