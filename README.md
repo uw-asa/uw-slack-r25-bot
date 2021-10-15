@@ -10,6 +10,7 @@ From within any Slack channel where the integration has been enabled, the follow
 
 - `/r25 help`
 - `/r25 [building code] [room number]`
+- `/r25 [building code] [room number] now`
 - `/r25 [building code] [room number] tomorrow`
 - `/r25 [building code] [room number] +1`
 - `/r25 [building code] [room number] +2`
@@ -87,6 +88,10 @@ Automated testing implemented with [Mocha](https://mochajs.org/), [Chai](http://
 #### Run Tests
 
 > `npm run test`
+
+#### Code Coverage
+
+> `npm run coverage`
 
 #### Github Actions
 

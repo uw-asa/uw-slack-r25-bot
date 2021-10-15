@@ -106,4 +106,11 @@ describe('parseCommand(queryText)', function () {
     expect(result.args.allBreaks).to.equal(false)
   })
 
+  it('Parses "...now" command correctly', function () {
+    const result = parser('KNE 130 now')
+    expect(result.numberOfElements).to.equal(3)
+    expect(result.resolvedCommand).to.equal('SCHEDULE')
+    expect(result.args.limitNow).to.be.true
+  })
+
 })

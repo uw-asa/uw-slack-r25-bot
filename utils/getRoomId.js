@@ -12,7 +12,7 @@ const spacesJson = require('./spaces.json')
 
 /**
  * Takes a string and returns an ID if it is found in the spaces list.
- * Rerturns null if the query was not in the room list.
+ * Returns null if the query was not in the room list.
  * @param {String} roomQuery Building code / room number 
  */
 function getRoomId(roomQuery) {

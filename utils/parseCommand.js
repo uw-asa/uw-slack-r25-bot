@@ -2,7 +2,7 @@
 
 /* parseCommand.js
  * Chase Sawyer
- * University of Washington, 2018
+ * University of Washington, 2018-2020
  * Helpful module for parsing out the received command, and helping the main handler
  * function decide what to do and what to return to slack/client.
  * Possible command types are some flavor of:
@@ -29,10 +29,13 @@ const getDateStrFromDayDelta = require('./datetimeUtils').getDateStrFromDayDelta
  *  - args: JSON containing:
  *    - dayDeltaStr: String - the '+{number}' offset for the query. '+1' or greater. Null for non-offset date.
  *    - allBreaks: Boolean - only false if command was for 'NEXT BREAK'
+ *    - limitNow: Boolean - only true if command was for 'NOW'
  */
 function parseCommand(queryText) {
+  // Clean up the query text, and make it all uppercase for easy matching
   queryText = queryText.trim().toUpperCase()
-  var command = {
+
+  const command = {
     elements: null,
     numberOfElements: null,
     resolvedCommand: null,
@@ -42,7 +45,8 @@ function parseCommand(queryText) {
     roomId: null,
     args: {
       dayDeltaStr: null,
-      allBreaks: true
+      allBreaks: true,
+      limitNow: false
     }
   }
 
@@ -59,19 +63,23 @@ function parseCommand(queryText) {
     command.resolvedCommand = 'SCHEDULE'
     command.queryDateStr = new Date().toLocaleDateString('en-US')
 
-    if (command.roomId == null) {
+    if (command.roomId === null) {
       command.resolvedCommand = 'ERROR'
       command.resolvedCommandText = responseText.text['ERROR-ROOM-QUERY']
 
     } else if (command.numberOfElements > 2 && command.elements[2].length >= 2) {
-      /* possible extended commands: 
+      /* possible extended commands:
+        ...['now'] == just show what's happening now
         ...['breaks'] == show all breaks
         ...['next break'] == show the next break only
-        ...['tomorrow'] == special - give tomorrow's times
+        ...['tomorrow'] == special: give tomorrow's times by converting to day delta
         ...['+1' | '+2' | etc.] == day delta
         TODO: ...['02/13/2018'] -- parse and find actual date
       */
-      if (command.elements[2] == 'TOMORROW') {
+      if (command.elements[2] == 'NOW') {
+        command.args.limitNow = true
+
+      } else if (command.elements[2] == 'TOMORROW') {
         command.args.dayDeltaStr = '+1'
         command.queryDateStr = getDateStrFromDayDelta(command.args.dayDeltaStr)
         
