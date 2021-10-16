@@ -1,8 +1,11 @@
 # Changes
 
-## [2021-10-15] 2.4.2
+## [2021-10-15] Version 2.4.3
 
 - Added HRC rooms [#25](https://github.com/uw-asa/uw-slack-r25-bot/issues/25)
+
+## [2021-10-15] 2.4.2
+
 - Update Node runtime support [#30](https://github.com/uw-asa/uw-slack-r25-bot/issues/30)
   - Added support for Node 14.x
   - Dropped support for Node 10.x
