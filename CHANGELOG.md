@@ -1,6 +1,16 @@
 # Changes
 
-## Version 2.4.1 [2021-05-14]
+## [2021-10-15] 2.4.2
+
+- Added HRC rooms [#25](https://github.com/uw-asa/uw-slack-r25-bot/issues/25)
+- Update Node runtime support [#30](https://github.com/uw-asa/uw-slack-r25-bot/issues/30)
+  - Added support for Node 14.x
+  - Dropped support for Node 10.x
+- Patched issue with LOCALE_OPTIONS that was causing time strings being compared to be a little weird. Overall still haven't fixed the issue surrounding events spanning Midnight. See [#14](https://github.com/uw-asa/uw-slack-r25-bot/issues/14)
+- Updated `serverless.yml` to clear up some deprecation warnings, config issues due to changes with how the framework handles some things.
+  - Added note to `README.md` regarding tests to serverless syntax before deployment.
+
+## [2021-05-14] Version 2.4.1
 
 ### Space Edits
 

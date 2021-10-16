@@ -1,6 +1,6 @@
 # Serverless configuration for a Slack / R25 (Resource 25) Webservice integration.
 # Code and project by Chase Sawyer
-# University of Washington, 2020
+# University of Washington, 2021
 #
 # For full config options, check the docs:
 #    docs.serverless.com
@@ -18,25 +18,26 @@ custom:
   region: us-west-2
   stage: prod # Change this to 'dev' or 'prod' or use the --stage: option from the command line
   timezone: 'America/Los_Angeles'
+  r25envfile: ${file(./env-vars/r25ws.json)}
+  slackenvfile: ${file(./env-vars/slack.json)}
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   memorySize: 128 # optional; 64 MB increments; range: 128-3008
   timeout: 30 # optional; in seconds; default = 6
-  reservedConcurrency: 10 # optional, reserved concurrency limit for this function. By default, AWS uses account concurrency limit
   versionFunctions: false # optional, default is true
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - SNS:Publish
-      Resource: { "Fn::Join" : [":", ["arn:aws:sns:${self:custom.region}", { "Ref" : "AWS::AccountId" }, "${self:custom.snsTopic}" ] ]  }
+  iam:
+    role:
+      statements:
+      - Effect: Allow
+        Action:
+          - SNS:Publish
+        Resource: { "Fn::Join" : [":", ["arn:aws:sns:${self:custom.region}", { "Ref" : "AWS::AccountId" }, "${self:custom.snsTopic}" ] ]  }
 
 # you can overwrite defaults here
   stage: ${self:custom.stage}
   region: ${self:custom.region}
-  r25envfile: ${file(./env-vars/r25ws.json)}
-  slackenvfile: ${file(./env-vars/slack.json)}
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -70,26 +71,26 @@ provider:
 functions:
   uw-slackr25:
     handler: handler.getTimes
+    reservedConcurrency: 10 # optional, reserved concurrency limit for this function. By default, AWS uses account concurrency limit
     package:
-      include:
-        - ./utils/**
-      exclude:
-        - ./test/**
+      patterns:
+        - './utils/**'
+        - '!./test/**'
     events:
       - sns: ${self:custom.snsTopic}
     environment:
       TZ: ${self:custom.timezone}
-      R25WSUSER: ${self:provider.r25envfile.user}
-      R25WSPASS: ${self:provider.r25envfile.password}
-      R25WSROOTURL: ${self:provider.r25envfile.baseUrl}
+      R25WSUSER: ${self:custom.r25envfile.user}
+      R25WSPASS: ${self:custom.r25envfile.password}
+      R25WSROOTURL: ${self:custom.r25envfile.baseUrl}
 
   uw-slackr25-parse:
     handler: handler.parse
+    reservedConcurrency: 10 # optional, reserved concurrency limit for this function. By default, AWS uses account concurrency limit
     package:
-      include:
-        - utils/**
-      exclude:
-        - test/**
+      patterns:
+        - './utils/**'
+        - '!./test/**'
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -123,7 +124,7 @@ functions:
 #    Define function environment variables here
     environment:
       TZ: ${self:custom.timezone}
-      SLACK_TOKEN: ${self:provider.slackenvfile.${self:custom.stage}.slack-token}
+      SLACK_TOKEN: ${self:custom.slackenvfile.${self:custom.stage}.slack-token}
       SNS_TOPIC_ARN: { "Fn::Join" : [":", ["arn:aws:sns:${self:custom.region}", { "Ref" : "AWS::AccountId" }, "${self:custom.snsTopic}" ] ]  }
 
 
