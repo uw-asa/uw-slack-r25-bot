@@ -105,6 +105,10 @@ From a terminal in the project root, run `npx sls deploy [function -f {function_
 
 **NOTE** The stage **DOES NOT** override what is saved in the serverless configuration file (`serverless.yml`)! Update the stage setting in the file to either "dev" or "prod" before running the above deploy command.
 
+#### Testing serverless.yml Syntax before Deploy
+
+To make sure the current yml syntax is compatible with changes to Serverless updates and upstream changes to AWS Services, run `npx sls info` to see any deprecation warnings or errors.
+
 #### Updates to spaces / space ids
 
 Updating `spaces.json` requires updating the **parse** function.

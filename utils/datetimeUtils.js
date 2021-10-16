@@ -2,7 +2,7 @@
 
 /* datetimeUtils.js
  * Chase Sawyer
- * University of Washington, 2018
+ * University of Washington, 2018-2021
  * 
  * Utility functions for dealing with dates/times in string and non-string formats.
  */
@@ -12,7 +12,7 @@ const MS_IN_DAY = 86400000
 const MS_IN_MINUTE = 60000
 const LOCALE = 'en-US'
 const LOCALE_OPTIONS = {
-  hour12: false,
+  hourCycle: 'h23',
 }
 
 /**
