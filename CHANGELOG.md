@@ -1,5 +1,10 @@
 # Changes
 
+## [2021-10-19] Unreleased
+
+- Updated AWS-SDK: 2.907.0 -> 2.1011.0
+- Updated serverless (dev): 2.41.2 -> 2.63.0
+
 ## [2021-10-15] Version 2.4.3
 
 - Added HRC rooms [#25](https://github.com/uw-asa/uw-slack-r25-bot/issues/25)
