@@ -4,6 +4,7 @@
 
 - Updated AWS-SDK: 2.907.0 -> 2.1011.0
 - Updated serverless (dev): 2.41.2 -> 2.63.0
+- Updated mocha(dev): 8.4.0 -> 9.1.3
 
 ## [2021-10-15] Version 2.4.3
 
