@@ -1,5 +1,13 @@
 # Changes
 
+## [2021-10-19] Version 2.4.4
+
+- Updated AWS-SDK: 2.907.0 -> 2.1011.0
+- Updated serverless (dev): 2.41.2 -> 2.63.0
+- Updated mocha(dev): 8.4.0 -> 9.1.3
+- Updated axios: 0.21.1 -> 0.23.0
+- Ran audit fixes to auto-pull patches for dependency vulnerabilities
+
 ## [2021-10-15] Version 2.4.3
 
 - Added HRC rooms [#25](https://github.com/uw-asa/uw-slack-r25-bot/issues/25)
