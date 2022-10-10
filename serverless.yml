@@ -1,11 +1,13 @@
 # Serverless configuration for a Slack / R25 (Resource 25) Webservice integration.
 # Code and project by Chase Sawyer
-# University of Washington, 2021
+# University of Washington, 2018-2022
 #
 # For full config options, check the docs:
 #    docs.serverless.com
 #
 # Happy Coding!
+
+frameworkVersion: '3'
 
 service: uw-slackr25bot # NOTE: update this with your service name
 
@@ -16,7 +18,7 @@ service: uw-slackr25bot # NOTE: update this with your service name
 custom:
   snsTopic: dispatchR25-${self:custom.stage}
   region: us-west-2
-  stage: prod # Change this to 'dev' or 'prod' or use the --stage: option from the command line
+  stage: dev # Change this to 'dev' or 'prod' or use the --stage: option from the command line
   timezone: 'America/Los_Angeles'
   r25envfile: ${file(./env-vars/r25ws.json)}
   slackenvfile: ${file(./env-vars/slack.json)}
@@ -77,7 +79,8 @@ functions:
         - './utils/**'
         - '!./test/**'
     events:
-      - sns: ${self:custom.snsTopic}
+      - sns:
+          topicName: ${self:custom.snsTopic}
     environment:
       TZ: ${self:custom.timezone}
       R25WSUSER: ${self:custom.r25envfile.user}
