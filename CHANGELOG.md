@@ -1,5 +1,14 @@
 # Changes
 
+## [2022-10-10] Version 2.4.5
+
+- Updated serverless (dev): 2.63.0 -> 2.72.3 -> 3.22.0 [#40](https://github.com/uw-asa/uw-slack-r25-bot/issues/40)
+- Updated serverless.yml
+- Updated node.js.yml for GitHub Actions CI [#39](https://github.com/uw-asa/uw-slack-r25-bot/issues/39)
+- Dropped Node v12 support [#39](https://github.com/uw-asa/uw-slack-r25-bot/issues/39)
+- Updated Axios: 0.23.0 -> 1.1.0 [#41](https://github.com/uw-asa/uw-slack-r25-bot/issues/41)
+- Updated testing libraries Mocha (9.2.2 -> 10.0.0) and Chai (4.3.4 -> 4.3.6) [#42](https://github.com/uw-asa/uw-slack-r25-bot/issues/42)
+
 ## [2021-10-19] Version 2.4.4
 
 - Updated AWS-SDK: 2.907.0 -> 2.1011.0
