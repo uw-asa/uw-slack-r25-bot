@@ -2,7 +2,7 @@
 
 /* getRoomId.js
  * Chase Sawyer
- * University of Washington, 2018
+ * University of Washington, 2018-2022
  * 
  * Helper module that matches the room query against a listing of rooms to
  * return a space ID from the lookup table.

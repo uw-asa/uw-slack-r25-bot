@@ -2,7 +2,7 @@
 
 /* parseCommand.js
  * Chase Sawyer
- * University of Washington, 2018-2020
+ * University of Washington, 2018-2022
  * Helpful module for parsing out the received command, and helping the main handler
  * function decide what to do and what to return to slack/client.
  * Possible command types are some flavor of:

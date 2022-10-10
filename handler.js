@@ -2,7 +2,7 @@
 
 /* AWS Lambda function handler.js
  * Chase Sawyer
- * University of Washington, 2018-2020
+ * University of Washington, 2018-2022
  * 
  * Defines two Lambda functions that make up two halves of the UW-SlackR25Bot slash command, '/r25'.
  * The parse handler parses an incoming Slack slash command through the AWS Gateway, and processes/validates

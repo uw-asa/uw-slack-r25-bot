@@ -2,7 +2,7 @@
 
 /* r25ws.js
  * Chase Sawyer
- * University of Washington, 2018-2019
+ * University of Washington, 2018-2022
  * 
  * Helper function(s) for communicating with the Resource25 web service. R25 web service documentation 
  * can be found at http://knowledge25.collegenet.com/display/WSW/Home

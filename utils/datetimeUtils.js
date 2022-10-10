@@ -2,7 +2,7 @@
 
 /* datetimeUtils.js
  * Chase Sawyer
- * University of Washington, 2018-2021
+ * University of Washington, 2018-2022
  * 
  * Utility functions for dealing with dates/times in string and non-string formats.
  */

@@ -2,7 +2,7 @@
 
 /* r25wsResponseHandler.js
  * Chase Sawyer
- * University of Washington, 2018
+ * University of Washington, 2018-2022
  * 
  * Utility functions for handling the response data from the r25 web service. Processes the data into a format
  * that can be posted to Slack without additional formatting.
@@ -169,7 +169,7 @@ function processBreaks(results, command) {
       })
     } else {
     // go through event start and end times to calculate inter-event breaks.
-    // this loop could uses two variables to iterate through the lists for clarity.
+    // this loop uses two variables to iterate through the lists for clarity.
       for (var s = 1, e = 0; s < startTimeStr.length; s++, e++) {
         var breakLengthMin = timeStrDiffMin(endTimeStr[e], startTimeStr[s])
         var timeToBreakMin = timeStrDiffMin(nowTimeStr, endTimeStr[e])

@@ -2,7 +2,7 @@
 
 /* postData.js
  * Chase Sawyer
- * University of Washington, 2018
+ * University of Washington, 2018-2022
  * 
  * Posts data back to Slack using the special URL generated/sent from the slash command.
  */
