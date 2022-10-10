@@ -18,7 +18,7 @@ service: uw-slackr25bot # NOTE: update this with your service name
 custom:
   snsTopic: dispatchR25-${self:custom.stage}
   region: us-west-2
-  stage: dev # Change this to 'dev' or 'prod' or use the --stage: option from the command line
+  stage: prod # Change this to 'dev' or 'prod' before deploying!
   timezone: 'America/Los_Angeles'
   r25envfile: ${file(./env-vars/r25ws.json)}
   slackenvfile: ${file(./env-vars/slack.json)}
