@@ -14,7 +14,7 @@
   "author": "Chase Sawyer (chase.sawyer@pm.me)",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.1011.0",
+    "aws-sdk": "^2.1354.0",
     "axios": "^1.1.2",
     "xml2js-parser": "^1.1.1"
   },
